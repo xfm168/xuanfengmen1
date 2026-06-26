@@ -306,3 +306,84 @@ export function getHexagramByNumber(number: number): Hexagram {
   const idx = Math.max(0, Math.min(63, number - 1))
   return OFFLINE_HEXAGRAMS[idx]
 }
+
+// ══════════════════════════════════════════════════
+//  Offline localStorage persistence for daily records
+//  Used as fallback when Supabase is unavailable
+// ══════════════════════════════════════════════════
+
+const OFFLINE_DAILY_KEY = 'xfm_offline_daily_records'
+
+interface OfflineDailyRecord {
+  id: string
+  visitor_id: string
+  date: string
+  hexagram_id: string
+  hexagram_number: number
+  score: number
+  career_score: number
+  wealth_score: number
+  love_score: number
+  health_score: number
+  lucky_color: string
+  lucky_number: number
+  analysis: string
+  created_at: string
+}
+
+function readOfflineRecords(): OfflineDailyRecord[] {
+  try {
+    const raw = localStorage.getItem(OFFLINE_DAILY_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+function writeOfflineRecords(records: OfflineDailyRecord[]): void {
+  try {
+    localStorage.setItem(OFFLINE_DAILY_KEY, JSON.stringify(records))
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+export function saveOfflineDaily(record: DailyHexagramWithDetail): void {
+  const records = readOfflineRecords()
+  const exists = records.find(r => r.visitor_id === record.visitor_id && r.date === record.date)
+  if (exists) return
+
+  const newRecord: OfflineDailyRecord = {
+    id: record.id || `offline-${record.date}`,
+    visitor_id: record.visitor_id,
+    date: record.date,
+    hexagram_id: record.hexagram_id,
+    hexagram_number: record.hexagram_number,
+    score: record.score,
+    career_score: record.career_score,
+    wealth_score: record.wealth_score,
+    love_score: record.love_score,
+    health_score: record.health_score,
+    lucky_color: record.lucky_color,
+    lucky_number: record.lucky_number,
+    analysis: record.analysis,
+    created_at: record.created_at,
+  }
+
+  records.push(newRecord)
+  records.sort((a, b) => b.date.localeCompare(a.date))
+  writeOfflineRecords(records)
+}
+
+export function getOfflineDailyRecords(visitorId: string): DailyHexagramWithDetail[] {
+  const records = readOfflineRecords()
+  return records
+    .filter(r => r.visitor_id === visitorId)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .map(r => ({
+      ...r,
+      hexagram: getHexagramByNumber(r.hexagram_number),
+    }))
+}

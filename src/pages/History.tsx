@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { getVisitorId, type DailyHexagramWithDetail } from '../lib/hexagram'
+import { getVisitorId, getOfflineDailyRecords, type DailyHexagramWithDetail } from '../lib/hexagram'
 import './History.css'
 
 // ── Record type system (extensible for future record types) ──
@@ -210,7 +210,25 @@ export default function History() {
 
         if (!supabase) {
           if (!cancelled) {
-            setRecords([])
+            const offlineRecords = getOfflineDailyRecords(visitorId)
+            const mapped: TimelineRecord[] = offlineRecords.map((row: DailyHexagramWithDetail) => ({
+              id:          row.id,
+              record_type: 'daily' as RecordType,
+              date:        row.date,
+              created_at:  row.created_at,
+              payload: {
+                hexagram_number: row.hexagram_number,
+                hexagram_name:   row.hexagram.name,
+                hexagram_symbol: row.hexagram.symbol,
+                lines:           row.hexagram.lines,
+                score:           row.score,
+                career_score:    row.career_score,
+                wealth_score:    row.wealth_score,
+                love_score:      row.love_score,
+                health_score:    row.health_score,
+              },
+            }))
+            setRecords(mapped)
             setStatus('ready')
           }
           return

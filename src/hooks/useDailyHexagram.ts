@@ -5,6 +5,7 @@ import {
   generateDailyValues,
   todayString,
   getHexagramByNumber,
+  saveOfflineDaily,
   type DailyHexagramWithDetail,
 } from '../lib/hexagram'
 
@@ -33,7 +34,7 @@ export function useDailyHexagram(): UseDailyHexagramResult {
 
         if (!supabase) {
           if (!cancelled) {
-            setData({
+            const record: DailyHexagramWithDetail = {
               id: '',
               visitor_id: visitorId,
               date: today,
@@ -49,7 +50,9 @@ export function useDailyHexagram(): UseDailyHexagramResult {
               analysis: generated.analysis,
               created_at: new Date().toISOString(),
               hexagram,
-            })
+            }
+            saveOfflineDaily(record)
+            setData(record)
             setStatus('ready')
           }
           return
