@@ -71,7 +71,9 @@ export default function FeatureCard({
     className,
   ].filter(Boolean).join(' ')
 
-  const iconContent = typeof icon === 'string' && icon !== 'custom' ? iconSvgs[icon] : icon
+  const iconContent = typeof icon === 'string' && icon !== 'custom'
+    ? iconSvgs[icon as Exclude<FeatureIconType, 'custom'>]
+    : icon
 
   const content = (
     <>
