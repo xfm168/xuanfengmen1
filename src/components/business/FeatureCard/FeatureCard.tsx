@@ -1,17 +1,21 @@
-import { ReactNode } from 'react'
+import { ReactNode, CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import './FeatureCard.css'
 
 export type FeatureIconType = 'bagua' | 'coins' | 'house' | 'records' | 'custom'
 
-export interface FeatureCardProps {
+export interface FeatureCardBaseProps {
   icon: FeatureIconType | ReactNode
   title: string
   subtitle: string
-  path?: string
-  onClick?: () => void
   className?: string
 }
+
+export type FeatureCardProps = FeatureCardBaseProps & (
+  | { path: string; style?: CSSProperties; onClick?: never }
+  | { onClick: () => void; path?: string; style?: CSSProperties }
+  | { path?: never; onClick?: never; style?: CSSProperties }
+)
 
 const iconSvgs: Record<Exclude<FeatureIconType, 'custom'>, ReactNode> = {
   bagua: (
@@ -65,6 +69,7 @@ export default function FeatureCard({
   path,
   onClick,
   className = '',
+  style,
 }: FeatureCardProps) {
   const classes = [
     'xbiz-feature-card',
@@ -90,7 +95,7 @@ export default function FeatureCard({
 
   if (path) {
     return (
-      <Link to={path} className={classes}>
+      <Link to={path} className={classes} style={style}>
         {content}
       </Link>
     )
@@ -98,7 +103,7 @@ export default function FeatureCard({
 
   if (onClick) {
     return (
-      <button className={classes} onClick={onClick}>
+      <button className={classes} onClick={onClick} style={style}>
         {content}
       </button>
     )
