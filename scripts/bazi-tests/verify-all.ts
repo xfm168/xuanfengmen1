@@ -2,7 +2,7 @@ import { calculateBaZi, getDayGanZhi, getYearGanZhi, getMonthGanZhi, getHourGanZ
 import { getNaYin } from '../../src/lib/bazi/nayin'
 import { getChangSheng } from '../../src/lib/bazi/changsheng'
 import { calculateShenShi } from '../../src/lib/bazi/shishen'
-import { getWangShuai } from '../../src/lib/bazi/wuxing'
+import { getWangShuai, getMonthMainElement } from '../../src/lib/bazi/wuxing'
 import type { BaZiChart } from '../../src/lib/bazi/types'
 
 let total = 0
@@ -230,7 +230,8 @@ const wangshuaiTests: { dayElement: string; monthZhi: string; expected: string }
 ]
 let wangshuaiFail = 0
 for (const tc of wangshuaiTests) {
-  const ws = getWangShuai(tc.dayElement as any, tc.monthZhi as any)
+  const monthElement = getMonthMainElement(tc.monthZhi)
+  const ws = getWangShuai(monthElement, tc.dayElement as any)
   const pass = test(`旺衰 ${tc.dayElement}日 ${tc.monthZhi}月`, ws, tc.expected)
   if (!pass) wangshuaiFail++
 }

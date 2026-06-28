@@ -21,7 +21,7 @@ import type {
 import { DEFAULT_BAZI_ANALYSIS } from '../../constants/defaultAnalysis'
 
 // 各模块
-import { getSolarTermDate, getYearSolarTerms, getMonthZhiIndex } from './solarTerms'
+import { getSolarTermDate, getYearSolarTerms, getMonthZhiIndex, isAfterLiChun } from './solarTerms'
 import { getNaYin } from './nayin'
 import { getChangSheng } from './changsheng'
 import { getRelatedShens, getStemElement, getStemYinYang } from './shishen'
@@ -88,12 +88,22 @@ function getDayGanZhi(date: Date): GanZhi {
 // ========== 年柱 ==========
 
 function getYearGanZhi(date: Date): GanZhi {
-  let year = date.getFullYear()
-  // 立春分年
-  const lichun = getSolarTermDate(year, '立春')
-  const lichunDate = new Date(year, lichun.month - 1, lichun.day)
-  if (date < lichunDate) {
-    year -= 1
+  const year = date.getFullYear()
+  // 立春分年：使用真节气判断
+  if (!isAfterLiChun(date, year)) {
+    // 未到立春，属于上一年
+    const prevYear = year - 1
+    const stemIndex = ((prevYear - 4) % 10 + 10) % 10
+    const branchIndex = ((prevYear - 4) % 12 + 12) % 12
+    const gan = HEAVENLY_STEMS[stemIndex]
+    const zhi = EARTHLY_BRANCHES[branchIndex]
+    return {
+      gan,
+      zhi,
+      element: getStemElement(gan),
+      yinYang: getStemYinYang(gan),
+      naYin: getNaYin(gan, zhi),
+    }
   }
 
   const stemIndex = ((year - 4) % 10 + 10) % 10
