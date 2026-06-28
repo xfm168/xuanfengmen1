@@ -18,17 +18,21 @@ export const baziPrompts: Record<string, AIPrompt> = {
 - 自称AI
 - 绝对化断言
 - 封建迷信内容`,
-    userTemplate: `生辰八字：
-出生时间：{{birthDateTime}}
+    userTemplate: `出生时间：{{birthDateTime}}
 性别：{{gender}}
 
-请推演：
-1. 四柱八字
-2. 五行强弱
-3. 格局判断
-4. 用神分析
-5. 性格特质
-6. 大运走势`,
+请严格返回以下 JSON 格式，不要输出 Markdown 或任何其他内容：
+{
+"overall":"总体命格",
+"personality":"性格分析",
+"career":"事业分析",
+"wealth":"财运分析",
+"relationship":"婚姻感情",
+"health":"健康建议",
+"wuxingAdvice":"五行建议",
+"summary":"综合总结"
+}
+缺少字段必须返回空字符串。`,
     defaultModel: 'gemini-2.0-pro',
     defaultTemperature: 0.6,
   },
