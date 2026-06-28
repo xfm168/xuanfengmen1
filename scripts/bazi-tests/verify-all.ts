@@ -1,5 +1,9 @@
-import { calculateBaZi, getDayGanZhi, getYearGanZhi, getMonthGanZhi, getHourGanZhi, getNaYin, getChangSheng, calculateShenShi, getWangShuai } from '../calculator'
-import type { BaZiChart } from '../types'
+import { calculateBaZi, getDayGanZhi, getYearGanZhi, getMonthGanZhi, getHourGanZhi } from '../../src/lib/bazi/calculator'
+import { getNaYin } from '../../src/lib/bazi/nayin'
+import { getChangSheng } from '../../src/lib/bazi/changsheng'
+import { calculateShenShi } from '../../src/lib/bazi/shishen'
+import { getWangShuai } from '../../src/lib/bazi/wuxing'
+import type { BaZiChart } from '../../src/lib/bazi/types'
 
 let total = 0
 let passed = 0
