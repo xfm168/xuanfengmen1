@@ -8,6 +8,8 @@ import PremiumReport from './pages/PremiumReport'
 import Daily from './pages/Daily'
 import History from './pages/History'
 import Divination from './pages/Divination'
+import BaziInput from './pages/BaziInput'
+import BaziChart from './pages/BaziChart'
 import './App.css'
 
 function App() {
@@ -22,6 +24,8 @@ function App() {
             <Route path="/analysis" element={<Analysis />} />
             <Route path="/premium-report" element={<PremiumReport />} />
             <Route path="/daily" element={<Daily />} />
+            <Route path="/bazi" element={<BaziInput />} />
+            <Route path="/bazi/chart" element={<BaziChart />} />
             <Route path="/liuyao" element={<Divination />} />
             <Route path="/records" element={<History />} />
           </Routes>

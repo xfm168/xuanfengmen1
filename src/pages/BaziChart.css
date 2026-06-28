@@ -1,0 +1,325 @@
+.bazi-chart-page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding-bottom: var(--space-16);
+}
+
+.bazi-chart-content {
+  padding: var(--space-6) var(--space-4);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.bazi-score-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-8) 0 var(--space-6);
+}
+
+.bazi-score-label {
+  margin-top: var(--space-3);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.2em;
+}
+
+.bazi-pillars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+  padding: var(--space-4);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.bazi-pillar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) 0;
+}
+
+.pillar-label {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.1em;
+}
+
+.pillar-gan {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--gold-500);
+  font-family: var(--font-serif);
+}
+
+.pillar-zhi {
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+}
+
+.pillar-element {
+  margin-top: var(--space-1);
+}
+
+.pillar-daymaster {
+  margin-top: 2px;
+}
+
+.bazi-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.bazi-tab {
+  flex: 1;
+  min-width: 80px;
+  height: 44px;
+  padding: 0 var(--space-3);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+
+.bazi-tab:hover {
+  color: var(--text-primary);
+}
+
+.bazi-tab.active {
+  color: var(--accent);
+}
+
+.bazi-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.bazi-tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 var(--space-4) 0;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.overview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.overview-row:last-child {
+  border-bottom: none;
+}
+
+.overview-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.overview-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+}
+
+.wuxing-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.wuxing-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.wuxing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wuxing-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-serif);
+}
+
+.wuxing-count {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+}
+
+.wuxing-summary {
+  font-size: 0.85rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin: var(--space-4) 0 0 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.shenshi-intro {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.shenshi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-2);
+}
+
+.shenshi-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-2);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.shenshi-gan {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--gold-500);
+  font-family: var(--font-serif);
+}
+
+.shenshi-name {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.xiyong-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6) 0;
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.xiyong-element {
+  font-size: 3rem;
+  font-weight: 700;
+  font-family: var(--font-serif);
+  margin-bottom: var(--space-2);
+}
+
+.xiyong-label {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.2em;
+}
+
+.xiyong-details {
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+.xiyong-details p {
+  margin: 0 0 var(--space-2) 0;
+}
+
+.xiyong-details p:last-child {
+  margin-bottom: 0;
+}
+
+.bazi-analysis-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.analysis-card {
+  margin-bottom: 0;
+}
+
+.analysis-text {
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.bazi-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+  position: sticky;
+  bottom: var(--space-4);
+}
+
+.bazi-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16) var(--space-4);
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.bazi-empty p {
+  margin: 0 0 var(--space-6) 0;
+}
+
+@media (max-width: 480px) {
+  .pillar-gan {
+    font-size: 1.2rem;
+  }
+
+  .pillar-zhi {
+    font-size: 1.1rem;
+  }
+
+  .shenshi-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .shenshi-name {
+    font-size: 0.65rem;
+  }
+}
