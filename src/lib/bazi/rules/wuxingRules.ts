@@ -110,6 +110,78 @@ function getSamePartyElements(dayElement: FiveElement): FiveElement[] {
   return [dayElement, yinElement]
 }
 
+function getDiffPartyElements(dayElement: FiveElement): FiveElement[] {
+  const same = getSamePartyElements(dayElement)
+  return (['木', '火', '土', '金', '水'] as FiveElement[]).filter(el => !same.includes(el))
+}
+
+function countStemElement(ctx: WuXingContext, element: FiveElement): number {
+  const pillars = [ctx.sixLines.year, ctx.sixLines.month, ctx.sixLines.day, ctx.sixLines.hour]
+  let count = 0
+  for (const p of pillars) {
+    if (getGanElement(p.gan) === element) count++
+  }
+  return count
+}
+
+function countBenGen(ctx: WuXingContext, element: FiveElement): number {
+  const pillars = [ctx.sixLines.year, ctx.sixLines.month, ctx.sixLines.day, ctx.sixLines.hour]
+  let count = 0
+  for (const p of pillars) {
+    const cang = ctx.cangGanData[p.zhi]
+    if (cang && getGanElement(cang.ben) === element) count++
+  }
+  return count
+}
+
+function hasLiuHe(ctx: WuXingContext): boolean {
+  const pillars = [ctx.sixLines.year, ctx.sixLines.month, ctx.sixLines.day, ctx.sixLines.hour]
+  const liuHeCombos: [EarthlyBranch, EarthlyBranch, FiveElement][] = [
+    ['子', '丑', '土'], ['寅', '亥', '木'], ['卯', '戌', '火'],
+    ['辰', '酉', '金'], ['巳', '申', '水'], ['午', '未', '土'],
+  ]
+  const zhiList = pillars.map(p => p.zhi)
+  for (const [a, b] of liuHeCombos) {
+    if (zhiList.includes(a) && zhiList.includes(b)) return true
+  }
+  return false
+}
+
+function hasSanHe(ctx: WuXingContext, element: FiveElement): boolean {
+  const pillars = [ctx.sixLines.year, ctx.sixLines.month, ctx.sixLines.day, ctx.sixLines.hour]
+  const sanHeCombos: Record<FiveElement, EarthlyBranch[]> = {
+    '木': ['亥', '卯', '未'],
+    '火': ['寅', '午', '戌'],
+    '土': ['辰', '戌', '丑', '未'],
+    '金': ['巳', '酉', '丑'],
+    '水': ['申', '子', '辰'],
+  }
+  const zhiList = pillars.map(p => p.zhi)
+  const combo = sanHeCombos[element]
+  if (!combo) return false
+  if (element === '土') {
+    let count = 0
+    for (const z of combo) {
+      if (zhiList.includes(z)) count++
+    }
+    return count >= 3
+  }
+  return combo.every(z => zhiList.includes(z))
+}
+
+function hasLiuChong(ctx: WuXingContext): boolean {
+  const pillars = [ctx.sixLines.year, ctx.sixLines.month, ctx.sixLines.day, ctx.sixLines.hour]
+  const liuChongCombos: [EarthlyBranch, EarthlyBranch][] = [
+    ['子', '午'], ['丑', '未'], ['寅', '申'],
+    ['卯', '酉'], ['辰', '戌'], ['巳', '亥'],
+  ]
+  const zhiList = pillars.map(p => p.zhi)
+  for (const [a, b] of liuChongCombos) {
+    if (zhiList.includes(a) && zhiList.includes(b)) return true
+  }
+  return false
+}
+
 // ========== 五行分数计算 ==========
 
 interface ElementScoreDetail {
@@ -509,6 +581,381 @@ export const WUXING_RULES: WuXingRule[] = [
       reason: '天干五合得化，化神有助',
     },
   },
+
+  // ===== 印星生扶规则 =====
+  {
+    id: 'yin-xing-tou-gan',
+    name: '印星透干',
+    category: '印星生扶',
+    priority: 145,
+    weight: 65,
+    description: '天干有印星透出，生扶日主',
+    reference: '《子平真诠》论印绶',
+    condition: (ctx) => {
+      const sameParty = getSamePartyElements(ctx.dayElement)
+      const yinElement = sameParty.find(el => el !== ctx.dayElement)
+      if (!yinElement) return false
+      return countStemElement(ctx, yinElement) >= 1
+    },
+    result: {
+      scoreAdjustment: 6,
+      reason: '印星透干，生身有力',
+    },
+  },
+  {
+    id: 'yin-xing-tong-gen',
+    name: '印星通根',
+    category: '印星生扶',
+    priority: 142,
+    weight: 60,
+    description: '印星在地支有根，生扶有力',
+    reference: '《滴天髓》通根篇',
+    condition: (ctx) => {
+      const sameParty = getSamePartyElements(ctx.dayElement)
+      const yinElement = sameParty.find(el => el !== ctx.dayElement)
+      if (!yinElement) return false
+      return countBenGen(ctx, yinElement) >= 1
+    },
+    result: {
+      scoreAdjustment: 4,
+      reason: '印星通根，生扶有根',
+    },
+  },
+  {
+    id: 'yin-xing-duoge',
+    name: '印星多',
+    category: '印星生扶',
+    priority: 140,
+    weight: 70,
+    description: '天干地支印星数量多，生扶过旺',
+    reference: '《子平真诠》论印绶',
+    condition: (ctx) => {
+      const sameParty = getSamePartyElements(ctx.dayElement)
+      const yinElement = sameParty.find(el => el !== ctx.dayElement)
+      if (!yinElement) return false
+      const stemCount = countStemElement(ctx, yinElement)
+      const genCount = countBenGen(ctx, yinElement)
+      return stemCount + genCount >= 3
+    },
+    result: {
+      scoreAdjustment: 8,
+      reason: '印星众多，生扶过旺',
+    },
+  },
+
+  // ===== 克泄耗规则 =====
+  {
+    id: 'guan-sha-tou-gan',
+    name: '官杀透干',
+    category: '克泄耗',
+    priority: 135,
+    weight: 70,
+    description: '天干有官杀透出，克制日主',
+    reference: '《子平真诠》论正官七杀',
+    condition: (ctx) => {
+      const diffEls = getDiffPartyElements(ctx.dayElement)
+      const guanShaElement = diffEls.find(el => OVERCOME[el] === ctx.dayElement)
+      if (!guanShaElement) return false
+      return countStemElement(ctx, guanShaElement) >= 1
+    },
+    result: {
+      scoreAdjustment: -7,
+      reason: '官杀透干，克身有力',
+    },
+  },
+  {
+    id: 'shi-shang-tou-gan',
+    name: '食伤透干',
+    category: '克泄耗',
+    priority: 130,
+    weight: 60,
+    description: '天干有食伤透出，泄日主之气',
+    reference: '《子平真诠》论食神伤官',
+    condition: (ctx) => {
+      const shiShangElement = GENERATE[ctx.dayElement]
+      return countStemElement(ctx, shiShangElement) >= 1
+    },
+    result: {
+      scoreAdjustment: -5,
+      reason: '食伤透干，泄身之气',
+    },
+  },
+  {
+    id: 'cai-xing-tou-gan',
+    name: '财星透干',
+    category: '克泄耗',
+    priority: 128,
+    weight: 55,
+    description: '天干有财星透出，耗日主之力',
+    reference: '《子平真诠》论财星',
+    condition: (ctx) => {
+      const caiElement = OVERCOME[ctx.dayElement]
+      return countStemElement(ctx, caiElement) >= 1
+    },
+    result: {
+      scoreAdjustment: -4,
+      reason: '财星透干，耗身之力',
+    },
+  },
+  {
+    id: 'guan-sha-wang',
+    name: '官杀旺',
+    category: '克泄耗',
+    priority: 125,
+    weight: 75,
+    description: '官杀得令或通根，克制有力',
+    reference: '《滴天髓》官杀篇',
+    condition: (ctx) => {
+      const diffEls = getDiffPartyElements(ctx.dayElement)
+      const guanShaElement = diffEls.find(el => OVERCOME[el] === ctx.dayElement)
+      if (!guanShaElement) return false
+      const stemCount = countStemElement(ctx, guanShaElement)
+      const genCount = countBenGen(ctx, guanShaElement)
+      const deLing = ctx.monthElement === guanShaElement
+      return (stemCount >= 1 && genCount >= 1) || (deLing && stemCount >= 1)
+    },
+    result: {
+      scoreAdjustment: -10,
+      reason: '官杀旺相，克身严重',
+    },
+  },
+
+  // ===== 地支六合规则 =====
+  {
+    id: 'liu-he-zhu-shen',
+    name: '六合助身',
+    category: '地支作用',
+    priority: 105,
+    weight: 50,
+    description: '地支六合化神为日主或印星，助力日主',
+    reference: '《三命通会》论地支六合',
+    condition: (ctx) => {
+      const sameParty = getSamePartyElements(ctx.dayElement)
+      const pillars = [ctx.sixLines.year, ctx.sixLines.month, ctx.sixLines.day, ctx.sixLines.hour]
+      const liuHeCombos: [EarthlyBranch, EarthlyBranch, FiveElement][] = [
+        ['子', '丑', '土'], ['寅', '亥', '木'], ['卯', '戌', '火'],
+        ['辰', '酉', '金'], ['巳', '申', '水'], ['午', '未', '土'],
+      ]
+      const zhiList = pillars.map(p => p.zhi)
+      for (const [a, b, hua] of liuHeCombos) {
+        if (zhiList.includes(a) && zhiList.includes(b)) {
+          if (sameParty.includes(hua)) return true
+        }
+      }
+      return false
+    },
+    result: {
+      scoreAdjustment: 4,
+      reason: '地支六合化神助身',
+    },
+  },
+  {
+    id: 'liu-he-ke-shen',
+    name: '六合克身',
+    category: '地支作用',
+    priority: 103,
+    weight: 50,
+    description: '地支六合化神为官杀财星，克耗日主',
+    reference: '《三命通会》论地支六合',
+    condition: (ctx) => {
+      const pillars = [ctx.sixLines.year, ctx.sixLines.month, ctx.sixLines.day, ctx.sixLines.hour]
+      const liuHeCombos: [EarthlyBranch, EarthlyBranch, FiveElement][] = [
+        ['子', '丑', '土'], ['寅', '亥', '木'], ['卯', '戌', '火'],
+        ['辰', '酉', '金'], ['巳', '申', '水'], ['午', '未', '土'],
+      ]
+      const zhiList = pillars.map(p => p.zhi)
+      for (const [a, b, hua] of liuHeCombos) {
+        if (zhiList.includes(a) && zhiList.includes(b)) {
+          if (OVERCOME[hua] === ctx.dayElement || OVERCOME[ctx.dayElement] === hua) return true
+        }
+      }
+      return false
+    },
+    result: {
+      scoreAdjustment: -4,
+      reason: '地支六合化神克耗日主',
+    },
+  },
+
+  // ===== 地支三合规则 =====
+  {
+    id: 'san-he-zhu-shen',
+    name: '三合助身',
+    category: '地支作用',
+    priority: 108,
+    weight: 65,
+    description: '地支三合化神为日主或印星，助力强大',
+    reference: '《三命通会》论三合',
+    condition: (ctx) => {
+      const sameParty = getSamePartyElements(ctx.dayElement)
+      for (const el of sameParty) {
+        if (hasSanHe(ctx, el)) return true
+      }
+      return false
+    },
+    result: {
+      scoreAdjustment: 8,
+      reason: '地支三合化神助身，力量强大',
+    },
+  },
+  {
+    id: 'san-he-ke-shen',
+    name: '三合克身',
+    category: '地支作用',
+    priority: 106,
+    weight: 65,
+    description: '地支三合化神为官杀，克制日主',
+    reference: '《三命通会》论三合',
+    condition: (ctx) => {
+      const diffEls = getDiffPartyElements(ctx.dayElement)
+      const guanShaElement = diffEls.find(el => OVERCOME[el] === ctx.dayElement)
+      if (!guanShaElement) return false
+      return hasSanHe(ctx, guanShaElement)
+    },
+    result: {
+      scoreAdjustment: -8,
+      reason: '地支三合化神克身，力量强大',
+    },
+  },
+
+  // ===== 地支六冲规则 =====
+  {
+    id: 'liu-chong-gen',
+    name: '六冲动根',
+    category: '地支作用',
+    priority: 100,
+    weight: 60,
+    description: '地支六冲，冲去日主根气',
+    reference: '《滴天髓》论六冲',
+    condition: (ctx) => {
+      if (!hasLiuChong(ctx)) return false
+      const pillars = [ctx.sixLines.year, ctx.sixLines.month, ctx.sixLines.day, ctx.sixLines.hour]
+      const liuChongCombos: [EarthlyBranch, EarthlyBranch][] = [
+        ['子', '午'], ['丑', '未'], ['寅', '申'],
+        ['卯', '酉'], ['辰', '戌'], ['巳', '亥'],
+      ]
+      const zhiList = pillars.map(p => p.zhi)
+      for (const [a, b] of liuChongCombos) {
+        if (zhiList.includes(a) && zhiList.includes(b)) {
+          const cangA = ctx.cangGanData[a]
+          const cangB = ctx.cangGanData[b]
+          if ((cangA && getGanElement(cangA.ben) === ctx.dayElement) ||
+              (cangB && getGanElement(cangB.ben) === ctx.dayElement)) {
+            return true
+          }
+        }
+      }
+      return false
+    },
+    result: {
+      scoreAdjustment: -6,
+      reason: '六冲动根，根基不稳',
+    },
+  },
+
+  // ===== 余气根规则 =====
+  {
+    id: 'yu-qi-gen',
+    name: '余气根',
+    category: '通根',
+    priority: 148,
+    weight: 35,
+    description: '地支有日主余气根但无本气中气根',
+    reference: '《滴天髓》通根篇',
+    condition: (ctx) => {
+      const pillars = [ctx.sixLines.year, ctx.sixLines.month, ctx.sixLines.day, ctx.sixLines.hour]
+      let hasBen = false
+      let hasZhong = false
+      let hasYao = false
+      for (const p of pillars) {
+        const cang = ctx.cangGanData[p.zhi]
+        if (!cang) continue
+        if (getGanElement(cang.ben) === ctx.dayElement) {
+          hasBen = true
+          break
+        }
+        if (cang.zhong && getGanElement(cang.zhong) === ctx.dayElement) {
+          hasZhong = true
+        }
+        if (cang.yao && getGanElement(cang.yao) === ctx.dayElement) {
+          hasYao = true
+        }
+      }
+      return !hasBen && !hasZhong && hasYao
+    },
+    result: {
+      scoreAdjustment: 2,
+      reason: '有少许余气根，略有根基',
+    },
+  },
+
+  // ===== 月令得地加深规则 =====
+  {
+    id: 'yue-ling-tong-gen',
+    name: '月令通根',
+    category: '月令',
+    priority: 195,
+    weight: 80,
+    description: '月令藏干中有日主本气，得令又得地',
+    reference: '《子平真诠》得令得地篇',
+    condition: (ctx) => {
+      const monthCang = ctx.cangGanData[ctx.monthZhi]
+      if (!monthCang) return false
+      return getGanElement(monthCang.ben) === ctx.dayElement
+    },
+    result: {
+      scoreAdjustment: 10,
+      reason: '月令本气为日主，得令又得地',
+    },
+  },
+
+  // ===== 日主得势规则 =====
+  {
+    id: 'de-shi',
+    name: '得势',
+    category: '透干',
+    priority: 146,
+    weight: 70,
+    description: '天干同党多（比劫+印星≥3），得势而旺',
+    reference: '《滴天髓》得势篇',
+    condition: (ctx) => {
+      const sameParty = getSamePartyElements(ctx.dayElement)
+      const pillars = [ctx.sixLines.year, ctx.sixLines.month, ctx.sixLines.day, ctx.sixLines.hour]
+      let count = 0
+      for (const p of pillars) {
+        if (sameParty.includes(getGanElement(p.gan))) count++
+      }
+      return count >= 3
+    },
+    result: {
+      scoreAdjustment: 7,
+      reason: '天干同党众多，得势而旺',
+    },
+  },
+
+  // ===== 日主失势规则 =====
+  {
+    id: 'shi-shi',
+    name: '失势',
+    category: '透干',
+    priority: 144,
+    weight: 65,
+    description: '天干异党多（官杀财食伤≥3），失势而弱',
+    reference: '《滴天髓》得势篇',
+    condition: (ctx) => {
+      const diffParty = getDiffPartyElements(ctx.dayElement)
+      const pillars = [ctx.sixLines.year, ctx.sixLines.month, ctx.sixLines.day, ctx.sixLines.hour]
+      let count = 0
+      for (const p of pillars) {
+        if (diffParty.includes(getGanElement(p.gan))) count++
+      }
+      return count >= 3
+    },
+    result: {
+      scoreAdjustment: -7,
+      reason: '天干异党众多，失势而弱',
+    },
+  },
 ]
 
 // ========== 核心计算函数 ==========
@@ -628,14 +1075,16 @@ export function calculateStrengthV2(
   finalScore = Math.max(0, Math.min(100, Math.round(finalScore)))
 
   // 6. 判断等级
+  // 阈值说明：中和范围最广（35-65），符合命理中"中和为贵"的理念
+  // 极弱/极强是极端情况，占比较少
   let level: StrengthResult['level']
-  if (finalScore < 20) {
+  if (finalScore < 15) {
     level = '极弱'
-  } else if (finalScore < 40) {
+  } else if (finalScore < 35) {
     level = '偏弱'
-  } else if (finalScore < 60) {
+  } else if (finalScore < 65) {
     level = '中和'
-  } else if (finalScore < 80) {
+  } else if (finalScore < 85) {
     level = '偏强'
   } else {
     level = '极强'
