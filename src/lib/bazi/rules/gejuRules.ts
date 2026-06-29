@@ -35,6 +35,8 @@ export type GeJuName =
   | '调候格' | '寒暖燥湿格' | '病药格' | '扶抑格' | '通关格'
   // 特殊格
   | '飞天禄马' | '金神格' | '魁罡格'
+  | '六乙鼠贵' | '壬骑龙背' | '六阴朝阳'
+  | '六甲趋乾' | '井栏叉格' | '倒冲格'
   | '普通格局'
 
 export interface GeJuContext extends RuleContext {
@@ -79,6 +81,16 @@ const GENERATE: Record<FiveElement, FiveElement> = {
 
 const OVERCOME: Record<FiveElement, FiveElement> = {
   '木': '土', '土': '水', '水': '火', '火': '金', '金': '木',
+}
+
+// 克我者（官杀）：OVERCOME 的反向
+const BE_OVERCOME: Record<FiveElement, FiveElement> = {
+  '木': '金', '土': '木', '水': '土', '火': '水', '金': '火',
+}
+
+// 生我者（印星）：GENERATE 的反向
+const BE_GENERATE: Record<FiveElement, FiveElement> = {
+  '木': '水', '火': '木', '土': '火', '金': '土', '水': '金',
 }
 
 function getElement(gan: string): FiveElement {
@@ -244,7 +256,7 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     description: '日主极弱，官杀当令成势，日主不得不从',
     reference: '《子平真诠》从格篇',
     condition: (ctx) => {
-      const guanShaElement = OVERCOME[ctx.dayElement]
+      const guanShaElement = BE_OVERCOME[ctx.dayElement]
       return ctx.monthElement === guanShaElement
         && ctx.strengthScore < 20
         && !ctx.hasTongGen
@@ -271,7 +283,7 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     description: '七杀强旺，日主无根弃命相从',
     reference: '《三命通会》弃命从杀',
     condition: (ctx) => {
-      const guanShaElement = OVERCOME[ctx.dayElement]
+      const guanShaElement = BE_OVERCOME[ctx.dayElement]
       return ctx.monthElement === guanShaElement
         && ctx.strengthScore < 15
         && !ctx.hasTongGen
@@ -298,7 +310,7 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     description: '正官强旺，日主无根弃命相从',
     reference: '《三命通会》弃命从官',
     condition: (ctx) => {
-      const guanShaElement = OVERCOME[ctx.dayElement]
+      const guanShaElement = BE_OVERCOME[ctx.dayElement]
       return ctx.monthElement === guanShaElement
         && ctx.strengthScore < 15
         && !ctx.hasTongGen
@@ -834,6 +846,261 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     },
   },
 
+  // ===== 正格第二层：成格细化与层次判断（Priority 95-99） =====
+
+  // 正官格-上格（官透有根有印有财）
+  {
+    id: 'zhengguan-shangge',
+    name: '正官上格',
+    category: '正格成格',
+    priority: 99,
+    weight: 95,
+    description: '正官格中，官透有根、有印护、有财生，成上格',
+    reference: '《子平真诠》正官格成格',
+    condition: (ctx) => {
+      if (ctx.monthGanShen !== '正官') return false
+      const stems = [ctx.sixLines.year.gan, ctx.sixLines.month.gan, ctx.sixLines.day.gan, ctx.sixLines.hour.gan]
+      const hasYin = stems.some(g => ctx.relatedShens[g] === '正印' || ctx.relatedShens[g] === '偏印')
+      const hasCai = stems.some(g => ctx.relatedShens[g] === '正财' || ctx.relatedShens[g] === '偏财')
+      return hasYin && hasCai && ctx.tongGenCount >= 1
+    },
+    result: {
+      name: '正官格' as GeJuName,
+      category: '正格' as GeJuCategory,
+      isSpecial: false,
+      score: 95,
+      confidence: 92,
+      description: '官透有根，财官印全，正官上格，贵气逼人',
+      reasons: ['官透有根', '财官印全', '格局纯正'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 正官格-中格（官透有根或有印）
+  {
+    id: 'zhengguan-zhongge',
+    name: '正官中格',
+    category: '正格成格',
+    priority: 98,
+    weight: 85,
+    description: '正官格中，官透有根或有印护，成中格',
+    reference: '《子平真诠》正官格成格',
+    condition: (ctx) => {
+      if (ctx.monthGanShen !== '正官') return false
+      const stems = [ctx.sixLines.year.gan, ctx.sixLines.month.gan, ctx.sixLines.day.gan, ctx.sixLines.hour.gan]
+      const hasYin = stems.some(g => ctx.relatedShens[g] === '正印' || ctx.relatedShens[g] === '偏印')
+      const hasCai = stems.some(g => ctx.relatedShens[g] === '正财' || ctx.relatedShens[g] === '偏财')
+      return (hasYin || hasCai || ctx.tongGenCount >= 1)
+    },
+    result: {
+      name: '正官格' as GeJuName,
+      category: '正格' as GeJuCategory,
+      isSpecial: false,
+      score: 82,
+      confidence: 80,
+      description: '官透有根有辅，正官中格，可得小贵',
+      reasons: ['官星透干', '有辅助之神'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 七杀格-上格（杀透有制有印化）
+  {
+    id: 'qisha-shangge',
+    name: '七杀上格',
+    category: '正格成格',
+    priority: 99,
+    weight: 95,
+    description: '七杀格中，杀透有制、有印化杀，成上格',
+    reference: '《子平真诠》七杀格成格',
+    condition: (ctx) => {
+      if (ctx.monthGanShen !== '偏官') return false
+      const stems = [ctx.sixLines.year.gan, ctx.sixLines.month.gan, ctx.sixLines.day.gan, ctx.sixLines.hour.gan]
+      const hasYin = stems.some(g => ctx.relatedShens[g] === '正印' || ctx.relatedShens[g] === '偏印')
+      const hasShi = stems.some(g => ctx.relatedShens[g] === '食神')
+      return (hasYin || hasShi) && ctx.tongGenCount >= 1
+    },
+    result: {
+      name: '七杀格' as GeJuName,
+      category: '正格' as GeJuCategory,
+      isSpecial: false,
+      score: 95,
+      confidence: 90,
+      description: '杀透有制有化，杀印相生，七杀上格',
+      reasons: ['杀透有制', '印化杀生', '格局纯正'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 七杀格-中格（杀透有根）
+  {
+    id: 'qisha-zhongge',
+    name: '七杀中格',
+    category: '正格成格',
+    priority: 98,
+    weight: 82,
+    description: '七杀格中，杀透有根，成中格',
+    reference: '《子平真诠》七杀格成格',
+    condition: (ctx) => {
+      if (ctx.monthGanShen !== '偏官') return false
+      return ctx.tongGenCount >= 1 || ctx.strengthScore >= 40
+    },
+    result: {
+      name: '七杀格' as GeJuName,
+      category: '正格' as GeJuCategory,
+      isSpecial: false,
+      score: 78,
+      confidence: 75,
+      description: '杀透有根，七杀中格，武贵可期',
+      reasons: ['七杀透干', '日主有根'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 正印格-上格（印透有根有官生）
+  {
+    id: 'zhengyin-shangge',
+    name: '正印上格',
+    category: '正格成格',
+    priority: 99,
+    weight: 92,
+    description: '正印格中，印透有根、有官生印，成上格',
+    reference: '《子平真诠》正印格成格',
+    condition: (ctx) => {
+      if (ctx.monthGanShen !== '正印') return false
+      const stems = [ctx.sixLines.year.gan, ctx.sixLines.month.gan, ctx.sixLines.day.gan, ctx.sixLines.hour.gan]
+      const hasGuan = stems.some(g => ctx.relatedShens[g] === '正官' || ctx.relatedShens[g] === '偏官')
+      return hasGuan && ctx.tongGenCount >= 1
+    },
+    result: {
+      name: '正印格' as GeJuName,
+      category: '正格' as GeJuCategory,
+      isSpecial: false,
+      score: 92,
+      confidence: 88,
+      description: '印透有根，官印相生，正印上格，清贵之命',
+      reasons: ['印透有根', '官印相生', '格局清贵'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 食神格-上格（食透有根有财生）
+  {
+    id: 'shishen-shangge',
+    name: '食神上格',
+    category: '正格成格',
+    priority: 99,
+    weight: 92,
+    description: '食神格中，食透有根、有财泄秀，成上格',
+    reference: '《子平真诠》食神格成格',
+    condition: (ctx) => {
+      if (ctx.monthGanShen !== '食神') return false
+      const stems = [ctx.sixLines.year.gan, ctx.sixLines.month.gan, ctx.sixLines.day.gan, ctx.sixLines.hour.gan]
+      const hasCai = stems.some(g => ctx.relatedShens[g] === '正财' || ctx.relatedShens[g] === '偏财')
+      return hasCai && ctx.tongGenCount >= 1
+    },
+    result: {
+      name: '食神格' as GeJuName,
+      category: '正格' as GeJuCategory,
+      isSpecial: false,
+      score: 92,
+      confidence: 88,
+      description: '食透有根，食神生财，食神上格，福禄丰厚',
+      reasons: ['食神透干', '食神生财', '福禄丰厚'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 伤官格-上格（伤透有根有财泄）
+  {
+    id: 'shangguan-shangge',
+    name: '伤官上格',
+    category: '正格成格',
+    priority: 99,
+    weight: 90,
+    description: '伤官格中，伤透有根、有财泄秀，成上格',
+    reference: '《子平真诠》伤官格成格',
+    condition: (ctx) => {
+      if (ctx.monthGanShen !== '伤官') return false
+      const stems = [ctx.sixLines.year.gan, ctx.sixLines.month.gan, ctx.sixLines.day.gan, ctx.sixLines.hour.gan]
+      const hasCai = stems.some(g => ctx.relatedShens[g] === '正财' || ctx.relatedShens[g] === '偏财')
+      return hasCai && ctx.tongGenCount >= 1
+    },
+    result: {
+      name: '伤官格' as GeJuName,
+      category: '正格' as GeJuCategory,
+      isSpecial: false,
+      score: 90,
+      confidence: 85,
+      description: '伤透有根，伤官生财，伤官上格，才华横溢',
+      reasons: ['伤官透干', '伤官生财', '才华横溢'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 正财格-上格（财透有根有官护）
+  {
+    id: 'zhengcai-shangge',
+    name: '正财上格',
+    category: '正格成格',
+    priority: 99,
+    weight: 92,
+    description: '正财格中，财透有根、有官护财，成上格',
+    reference: '《子平真诠》正财格成格',
+    condition: (ctx) => {
+      if (ctx.monthGanShen !== '正财') return false
+      const stems = [ctx.sixLines.year.gan, ctx.sixLines.month.gan, ctx.sixLines.day.gan, ctx.sixLines.hour.gan]
+      const hasGuan = stems.some(g => ctx.relatedShens[g] === '正官')
+      return hasGuan && ctx.tongGenCount >= 1
+    },
+    result: {
+      name: '正财格' as GeJuName,
+      category: '正格' as GeJuCategory,
+      isSpecial: false,
+      score: 92,
+      confidence: 88,
+      description: '财透有根，财官相生，正财上格，富贵双全',
+      reasons: ['财透有根', '财官相生', '富贵双全'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 偏财格-上格（财透有根有食生）
+  {
+    id: 'piancai-shangge',
+    name: '偏财上格',
+    category: '正格成格',
+    priority: 99,
+    weight: 90,
+    description: '偏财格中，财透有根、有食生财，成上格',
+    reference: '《子平真诠》偏财格成格',
+    condition: (ctx) => {
+      if (ctx.monthGanShen !== '偏财') return false
+      const stems = [ctx.sixLines.year.gan, ctx.sixLines.month.gan, ctx.sixLines.day.gan, ctx.sixLines.hour.gan]
+      const hasShi = stems.some(g => ctx.relatedShens[g] === '食神' || ctx.relatedShens[g] === '伤官')
+      return hasShi && ctx.tongGenCount >= 1
+    },
+    result: {
+      name: '偏财格' as GeJuName,
+      category: '正格' as GeJuCategory,
+      isSpecial: false,
+      score: 90,
+      confidence: 85,
+      description: '财透有根，食神生财，偏财上格，大富可期',
+      reasons: ['偏财透干', '食神生财', '大富之格'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
   // ===== 破格规则（Priority 300+，最高） =====
   // 破格规则：判断格局是否被破坏
 
@@ -847,7 +1114,9 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     description: '正官格中，官星被伤官克制破格',
     reference: '《子平真诠》正官格破格',
     condition: (ctx) => {
-      return ctx.monthGanShen === '正官' && Object.keys(ctx.relatedShens).length > 0
+      const stems = [ctx.sixLines.year.gan, ctx.sixLines.month.gan, ctx.sixLines.day.gan, ctx.sixLines.hour.gan]
+      const hasShangguan = stems.some(g => ctx.relatedShens[g] === '伤官')
+      return ctx.monthGanShen === '正官' && hasShangguan
     },
     result: {
       name: '正官格' as GeJuName,
@@ -1273,7 +1542,7 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     description: '命局偏枯严重，格局难成',
     reference: '《滴天髓》偏枯论',
     condition: (ctx) => {
-      return ctx.strengthScore < 15 || ctx.strengthScore > 85
+      return ctx.strengthScore < 15
     },
     result: {
       name: '普通格局' as GeJuName,
@@ -1429,6 +1698,167 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     },
   },
 
+  // 六乙鼠贵格
+  {
+    id: 'liuyi-shugui',
+    name: '六乙鼠贵格',
+    category: '特殊格局',
+    priority: 175,
+    weight: 82,
+    description: '六乙日生时遇子，以子为贵神',
+    reference: '《三命通会》六乙鼠贵格',
+    condition: (ctx) => {
+      const dayGan = ctx.dayGan
+      const hourZhi = ctx.sixLines.hour.zhi
+      const yiDays = ['乙']
+      return yiDays.includes(dayGan) && hourZhi === '子'
+    },
+    result: {
+      name: '六乙鼠贵' as GeJuName,
+      category: '特殊格' as GeJuCategory,
+      isSpecial: true,
+      score: 80,
+      confidence: 75,
+      description: '六乙鼠贵，贵神加临',
+      reasons: ['六乙日', '子时贵神'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 壬骑龙背格
+  {
+    id: 'renqi-longbei',
+    name: '壬骑龙背格',
+    category: '特殊格局',
+    priority: 175,
+    weight: 85,
+    description: '壬辰日生，壬骑龙背',
+    reference: '《三命通会》壬骑龙背格',
+    condition: (ctx) => {
+      return ctx.dayGan === '壬' && ctx.sixLines.day.zhi === '辰'
+    },
+    result: {
+      name: '壬骑龙背' as GeJuName,
+      category: '特殊格' as GeJuCategory,
+      isSpecial: true,
+      score: 83,
+      confidence: 78,
+      description: '壬骑龙背，大贵之格',
+      reasons: ['壬辰日', '壬骑龙背'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 六阴朝阳格
+  {
+    id: 'liuyin-chaoyang',
+    name: '六阴朝阳格',
+    category: '特殊格局',
+    priority: 175,
+    weight: 83,
+    description: '六辛日生时遇子，六阴朝阳',
+    reference: '《三命通会》六阴朝阳格',
+    condition: (ctx) => {
+      return ctx.dayGan === '辛' && ctx.sixLines.hour.zhi === '子'
+    },
+    result: {
+      name: '六阴朝阳' as GeJuName,
+      category: '特殊格' as GeJuCategory,
+      isSpecial: true,
+      score: 81,
+      confidence: 76,
+      description: '六阴朝阳，贵气自来',
+      reasons: ['六辛日', '子时朝阳'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 六甲趋乾格
+  {
+    id: 'liujia-quqian',
+    name: '六甲趋乾格',
+    category: '特殊格局',
+    priority: 175,
+    weight: 82,
+    description: '六甲日生时遇亥，趋乾格',
+    reference: '《三命通会》六甲趋乾格',
+    condition: (ctx) => {
+      return ctx.dayGan === '甲' && ctx.sixLines.hour.zhi === '亥'
+    },
+    result: {
+      name: '六甲趋乾' as GeJuName,
+      category: '特殊格' as GeJuCategory,
+      isSpecial: true,
+      score: 80,
+      confidence: 75,
+      description: '六甲趋乾，贵气加临',
+      reasons: ['六甲日', '亥时趋乾'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 井栏叉格
+  {
+    id: 'jinglan-cha',
+    name: '井栏叉格',
+    category: '特殊格局',
+    priority: 170,
+    weight: 80,
+    description: '庚申日生，地支全申子辰，井栏叉格',
+    reference: '《三命通会》井栏叉格',
+    condition: (ctx) => {
+      if (ctx.dayGan !== '庚') return false
+      const zhis = [ctx.sixLines.year.zhi, ctx.sixLines.month.zhi, ctx.sixLines.day.zhi, ctx.sixLines.hour.zhi]
+      const hasShen = zhis.includes('申')
+      const hasZi = zhis.includes('子')
+      const hasChen = zhis.includes('辰')
+      return hasShen && hasZi && hasChen
+    },
+    result: {
+      name: '井栏叉格' as GeJuName,
+      category: '特殊格' as GeJuCategory,
+      isSpecial: true,
+      score: 82,
+      confidence: 75,
+      description: '井栏叉格，金水相涵',
+      reasons: ['庚申日主', '申子辰全', '井栏叉格'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 倒冲格
+  {
+    id: 'daochong-ge',
+    name: '倒冲格',
+    category: '特殊格局',
+    priority: 170,
+    weight: 78,
+    description: '丙午日生，地支多午，倒冲禄马',
+    reference: '《三命通会》倒冲格',
+    condition: (ctx) => {
+      if (ctx.dayGan !== '丙') return false
+      const zhis = [ctx.sixLines.year.zhi, ctx.sixLines.month.zhi, ctx.sixLines.day.zhi, ctx.sixLines.hour.zhi]
+      const wuCount = zhis.filter(z => z === '午').length
+      return wuCount >= 2
+    },
+    result: {
+      name: '倒冲格' as GeJuName,
+      category: '特殊格' as GeJuCategory,
+      isSpecial: true,
+      score: 78,
+      confidence: 72,
+      description: '倒冲禄马，丙日午多',
+      reasons: ['丙午日主', '午多倒冲'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
   // ===== 从格真假判断（Priority 180-195） =====
 
   // 真从官杀格
@@ -1441,7 +1871,7 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     description: '日主极弱无根，官杀当令成势，真从官杀',
     reference: '《子平真诠》真从格',
     condition: (ctx) => {
-      const guanShaElement = OVERCOME[ctx.dayElement]
+      const guanShaElement = BE_OVERCOME[ctx.dayElement]
       return ctx.monthElement === guanShaElement
         && ctx.strengthScore < 15
         && !ctx.hasTongGen
@@ -1470,7 +1900,7 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     description: '日主有微根，但官杀势大，假从官杀',
     reference: '《子平真诠》假从格',
     condition: (ctx) => {
-      const guanShaElement = OVERCOME[ctx.dayElement]
+      const guanShaElement = BE_OVERCOME[ctx.dayElement]
       return ctx.monthElement === guanShaElement
         && ctx.strengthScore >= 15
         && ctx.strengthScore < 25
@@ -1599,6 +2029,92 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
       confidence: 68,
       description: '日主有微根不甚旺，假从儿格格局欠纯',
       reasons: ['日主有微根', '食伤势大', '假从之格'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 半从格
+  {
+    id: 'ban-cong',
+    name: '半从格',
+    category: '从格',
+    priority: 165,
+    weight: 65,
+    description: '日主有根气但被制，半从半不从',
+    reference: '《滴天髓》从格篇',
+    condition: (ctx) => {
+      return ctx.strengthScore >= 20
+        && ctx.strengthScore < 35
+        && ctx.tongGenCount >= 1
+        && ctx.tongGenCount <= 2
+        && ctx.diffPartyCount >= 2
+    },
+    result: {
+      name: '假从格' as GeJuName,
+      category: '从格' as GeJuCategory,
+      isSpecial: true,
+      score: 65,
+      confidence: 60,
+      description: '日主有根但被制，半从半不从，格局未定',
+      reasons: ['日主有微根', '异党势大', '半从之格'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 从而不从格
+  {
+    id: 'cong-er-bucong',
+    name: '从而不从格',
+    category: '从格',
+    priority: 160,
+    weight: 55,
+    description: '看似从格实有根气，从而不从',
+    reference: '《子平真诠》从格篇',
+    condition: (ctx) => {
+      return ctx.strengthScore >= 30
+        && ctx.strengthScore < 45
+        && ctx.tongGenCount >= 2
+        && ctx.diffPartyCount >= 2
+    },
+    result: {
+      name: '假从格' as GeJuName,
+      category: '从格' as GeJuCategory,
+      isSpecial: false,
+      score: 55,
+      confidence: 50,
+      description: '看似从格实有根气，从而不从，需仔细辨别',
+      reasons: ['有根气', '从而不从', '需细辨'],
+      poGe: false,
+      poGeReason: '',
+    },
+  },
+
+  // 假专旺格
+  {
+    id: 'jia-zhuanwang',
+    name: '假专旺格',
+    category: '专旺格',
+    priority: 195,
+    weight: 80,
+    description: '日主极旺但有微弱点，假专旺',
+    reference: '《滴天髓》专旺格篇',
+    condition: (ctx) => {
+      return ctx.strengthScore >= 75
+        && ctx.strengthScore < 85
+        && ctx.tongGenCount >= 2
+        && ctx.diffPartyCount <= 1
+        && ctx.isSeasonal
+    },
+    result: {
+      name: '专旺格' as GeJuName,
+      category: '专旺格' as GeJuCategory,
+      isSpecial: true,
+      score: 80,
+      confidence: 70,
+      description: '日主旺相但略有微弱点，假专旺之格',
+      reasons: ['日主旺相', '略有微弱点', '假专旺'],
       poGe: false,
       poGeReason: '',
     },
@@ -1814,7 +2330,7 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     description: '命局病重，药力不及，难以救药',
     reference: '《滴天髓》病药论',
     condition: (ctx) => {
-      return ctx.strengthScore < 20 || ctx.strengthScore > 80
+      return ctx.strengthScore < 20
     },
     result: {
       name: '病药格' as GeJuName,
@@ -2065,7 +2581,7 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     description: '命局缺陷明显，格局下等',
     reference: '《滴天髓》格局论',
     condition: (ctx) => {
-      return ctx.strengthScore < 20 || ctx.strengthScore > 80 || (ctx.touGanCount === 0 && ctx.tongGenCount === 0)
+      return ctx.strengthScore < 20 || (ctx.touGanCount === 0 && ctx.tongGenCount === 0)
     },
     result: {
       name: '普通格局' as GeJuName,
@@ -2142,7 +2658,7 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     description: '日主极弱无根，印星当令成势，真从印',
     reference: '《子平真诠》真从格',
     condition: (ctx) => {
-      const yinElement = ctx.dayElement // 印星与日主同象
+      const yinElement = BE_GENERATE[ctx.dayElement]
       return ctx.monthElement === yinElement
         && ctx.strengthScore < 15
         && !ctx.hasTongGen
@@ -2225,7 +2741,7 @@ export const GEJU_RULES: BaseRule<GeJuContext, Partial<GeJuResult>>[] = [
     description: '命局用神被破坏，格局万终',
     reference: '《滴天髓》偏枯论',
     condition: (ctx) => {
-      return ctx.strengthScore < 10 || ctx.strengthScore > 90
+      return ctx.strengthScore < 10
     },
     result: {
       name: '普通格局' as GeJuName,
@@ -2279,7 +2795,11 @@ export function buildGeJuContext(
 ): GeJuContext {
   const dayElement = getElement(dayGan)
   const dayYinYang = getYinYang(dayGan)
-  const monthMainElement = getElement(sixLines.month.zhi) // 月支主气
+  const BRANCH_ELEMENT: Record<string, FiveElement> = {
+    '子': '水', '丑': '土', '寅': '木', '卯': '木', '辰': '土', '巳': '火',
+    '午': '火', '未': '土', '申': '金', '酉': '金', '戌': '土', '亥': '水',
+  }
+  const monthMainElement = BRANCH_ELEMENT[sixLines.month.zhi] || '土'
 
   const monthGan = sixLines.month.gan
   const monthGanShen = relatedShens[monthGan] || '偏印'
@@ -2350,8 +2870,15 @@ export function buildGeJuContext(
 }
 
 /**
- * 计算格局 Confidence（置信度）
- * 基于：Rule命中数量、冲突数量、证据数量
+ * 计算格局 Confidence V2（置信度第二版）
+ * 7维度计算：
+ * 1. Rule权重加权
+ * 2. Rule优先级
+ * 3. Rule来源权威度
+ * 4. Rule否决度
+ * 5. Rule冲突度
+ * 6. 多算法一致率
+ * 7. 证据充分度
  */
 function calculateGeJuConfidence(
   bestMatch: RuleMatchResult<GeJuContext, Partial<GeJuResult>>,
@@ -2364,38 +2891,72 @@ function calculateGeJuConfidence(
     m.rule.result && (m.rule.category === '正格成格' || m.rule.category === '格局层次')
   )
 
-  // 1. 基础分数（从最佳匹配规则继承）
-  const baseConfidence = (bestMatch.rule.result as GeJuResult)?.confidence || 75
-  let confidence = baseConfidence
+  // ===== 维度1：Rule权重加权分数 =====
+  let totalWeight = 0
+  let weightedScore = 0
+  for (const m of matchedRules) {
+    if (m.rule.id.startsWith('default')) continue
+    const weight = m.rule.weight || 50
+    const ruleConfidence = (m.rule.result as GeJuResult)?.confidence || 60
+    weightedScore += ruleConfidence * weight
+    totalWeight += weight
+  }
+  const weightConfidence = totalWeight > 0 ? weightedScore / totalWeight : 60
 
-  // 2. 命中数量加成（命中的成格/层次规则越多，越可信）
-  const validRules = matchedRules.filter(m => !m.rule.id.startsWith('default'))
-  const ruleCount = validRules.length
-  if (ruleCount >= 5) confidence += 10
-  else if (ruleCount >= 3) confidence += 5
-  else if (ruleCount === 1) confidence -= 5
+  // ===== 维度2：Rule优先级加成 =====
+  const bestPriority = bestMatch.rule.priority || 50
+  const priorityBonus = Math.min(10, bestPriority / 20)
 
-  // 3. 破格惩罚
+  // ===== 维度3：来源权威度 =====
+  const reference = bestMatch.rule.reference || ''
+  let authorityBonus = 0
+  if (reference.includes('滴天髓')) authorityBonus += 5
+  if (reference.includes('子平真诠')) authorityBonus += 4
+  if (reference.includes('三命通会')) authorityBonus += 3
+  if (reference.includes('渊海子平')) authorityBonus += 3
+  if (reference.includes('穷通宝鉴')) authorityBonus += 3
+  authorityBonus = Math.min(5, authorityBonus)
+
+  // ===== 维度4：破格惩罚 =====
   const poGeCount = poGeRules.length
-  if (poGeCount >= 2) confidence -= 20
-  else if (poGeCount === 1) confidence -= 10
+  let poGePenalty = 0
+  if (poGeCount >= 3) poGePenalty = 25
+  else if (poGeCount >= 2) poGePenalty = 18
+  else if (poGeCount === 1) poGePenalty = 10
 
-  // 4. 成格加成
+  // ===== 维度5：成格加成 =====
   const chengGeCount = chengGeRules.length
-  if (chengGeCount >= 3) confidence += 10
-  else if (chengGeCount >= 1) confidence += 5
+  let chengGeBonus = 0
+  if (chengGeCount >= 4) chengGeBonus = 12
+  else if (chengGeCount >= 3) chengGeBonus = 8
+  else if (chengGeCount >= 2) chengGeBonus = 5
+  else if (chengGeCount >= 1) chengGeBonus = 3
 
-  // 5. 旺衰平衡加成
-  if (ctx.strengthScore >= 25 && ctx.strengthScore <= 75) confidence += 5
+  // ===== 维度6：多算法一致率 =====
+  const categories = new Set(matchedRules.map(m => m.rule.category))
+  const categoryCount = categories.size
+  const consistencyBonus = categoryCount >= 4 ? 5 : categoryCount >= 3 ? 3 : 0
 
-  // 6. 证据充分度（透干数量越多，证据越充分）
-  if (ctx.touGanCount >= 3) confidence += 5
-  else if (ctx.touGanCount >= 2) confidence += 3
+  // ===== 维度7：证据充分度 =====
+  let evidenceBonus = 0
+  if (ctx.touGanCount >= 3) evidenceBonus += 4
+  else if (ctx.touGanCount >= 2) evidenceBonus += 2
+  if (ctx.tongGenCount >= 3) evidenceBonus += 3
+  else if (ctx.tongGenCount >= 2) evidenceBonus += 2
+  if (ctx.strengthScore >= 30 && ctx.strengthScore <= 70) evidenceBonus += 3
 
-  // 确保置信度在 0-100 范围内
-  confidence = Math.max(0, Math.min(100, confidence))
+  // ===== 综合计算 =====
+  let confidence = weightConfidence
+    + priorityBonus
+    + authorityBonus
+    - poGePenalty
+    + chengGeBonus
+    + consistencyBonus
+    + evidenceBonus
 
-  // 7. 检测冲突
+  confidence = Math.max(0, Math.min(100, Math.round(confidence)))
+
+  // ===== 冲突检测 =====
   const conflicts: string[] = []
   if (poGeCount > 0 && chengGeCount > 0) {
     conflicts.push('格局成破并存，需综合判断')
@@ -2403,8 +2964,11 @@ function calculateGeJuConfidence(
   if (poGeCount >= 2) {
     conflicts.push('多重破格，格局不稳')
   }
+  if (categoryCount >= 4) {
+    conflicts.push('多格局命中，需细辨主次')
+  }
 
-  // 8. 生成原因说明
+  // ===== 生成原因说明 =====
   let reason = ''
   if (poGeCount > 0) {
     reason = poGeRules.map(m => (m.rule.result as GeJuResult)?.poGeReason || m.rule.name).join('；')
