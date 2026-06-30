@@ -39,6 +39,8 @@ export * from './aiImageAnalyzer'
 export * from './reportGenerator'
 export * from './vision'
 export * from './floor-plan'
+export * from './spatial'
+export * from './room-engine'
 
 import type { FengShuiContext, Direction, Room, Furniture } from './types'
 
