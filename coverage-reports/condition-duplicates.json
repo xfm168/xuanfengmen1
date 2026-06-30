@@ -1,0 +1,191 @@
+{
+  "totalGroups": 5,
+  "totalRulesAffected": 10,
+  "groups": [
+    {
+      "conditionLength": 226,
+      "conditionPreview": "ctx=>{const stems=[ctx.sixLines.year.gan,ctx.sixLines.month.gan,ctx.sixLines.day.gan,ctx.sixLines.hour.gan];const hasQisha=stems.some(g=>ctx.relatedShens[g]===\"\\u504F\\u5B98\");return ctx.monthGanShen===\"\\u6B63\\u5B98\"&&hasQisha}",
+      "ruleCount": 2,
+      "rules": [
+        {
+          "index": 39,
+          "ruleId": "zhengguan-poge-qisya",
+          "name": "正官破格-七杀混杂",
+          "category": "破格",
+          "priority": 92,
+          "weight": 90,
+          "resultName": "正官格",
+          "resultCategory": "正格",
+          "resultScore": 65,
+          "resultPoGe": true
+        },
+        {
+          "index": 137,
+          "ruleId": "zhengguan-poge-hunza",
+          "name": "正官破格-官杀混杂",
+          "category": "破格",
+          "priority": 95,
+          "weight": 92,
+          "resultName": "正官格",
+          "resultCategory": "正格",
+          "resultScore": 55,
+          "resultPoGe": true
+        }
+      ],
+      "analysis": {
+        "prioritySame": false,
+        "nameSame": false,
+        "categorySame": true,
+        "resultSame": true
+      }
+    },
+    {
+      "conditionLength": 317,
+      "conditionPreview": "ctx=>{const stems=[ctx.sixLines.year.gan,ctx.sixLines.month.gan,ctx.sixLines.day.gan,ctx.sixLines.hour.gan];const hasPianyin=stems.some(g=>ctx.relatedShens[g]===\"\\u504F\\u5370\");const hasShangguan=stems.some(g=>ctx.relatedShens[g]===\"\\u4F24\\u5B98\");return ctx.monthGanShen===\"\\u98DF\\u795E\"&&!hasPianyi",
+      "ruleCount": 2,
+      "rules": [
+        {
+          "index": 49,
+          "ruleId": "shishen-chengge-wuxie",
+          "name": "食神成格-食神无邪",
+          "category": "正格成格",
+          "priority": 220,
+          "weight": 85,
+          "resultName": "食神格",
+          "resultCategory": "正格",
+          "resultScore": 90,
+          "resultPoGe": false
+        },
+        {
+          "index": 71,
+          "ruleId": "qingcun-shishen",
+          "name": "清纯-食神清",
+          "category": "清纯判断",
+          "priority": 70,
+          "weight": 80,
+          "resultName": "食神格",
+          "resultCategory": "正格",
+          "resultScore": 88,
+          "resultPoGe": false
+        }
+      ],
+      "analysis": {
+        "prioritySame": false,
+        "nameSame": false,
+        "categorySame": false,
+        "resultSame": true
+      }
+    },
+    {
+      "conditionLength": 333,
+      "conditionPreview": "ctx=>{const stems=[ctx.sixLines.year.gan,ctx.sixLines.month.gan,ctx.sixLines.day.gan,ctx.sixLines.hour.gan];const hasSha=stems.some(g=>ctx.relatedShens[g]===\"\\u504F\\u5B98\");const hasYin=stems.some(g=>ctx.relatedShens[g]===\"\\u6B63\\u5370\"||ctx.relatedShens[g]===\"\\u504F\\u5370\");return hasSha&&hasYin&&c",
+      "ruleCount": 2,
+      "rules": [
+        {
+          "index": 59,
+          "ruleId": "shayin-xiangsheng",
+          "name": "杀印相生",
+          "category": "正格成格",
+          "priority": 202,
+          "weight": 88,
+          "resultName": "七杀格",
+          "resultCategory": "正格",
+          "resultScore": 90,
+          "resultPoGe": false
+        },
+        {
+          "index": 91,
+          "ruleId": "shayin-shuangqing",
+          "name": "杀印双清",
+          "category": "特殊格",
+          "priority": 150,
+          "weight": 82,
+          "resultName": "杀印双清",
+          "resultCategory": "特殊格",
+          "resultScore": 85,
+          "resultPoGe": false
+        }
+      ],
+      "analysis": {
+        "prioritySame": false,
+        "nameSame": false,
+        "categorySame": false,
+        "resultSame": false
+      }
+    },
+    {
+      "conditionLength": 121,
+      "conditionPreview": "ctx=>{const gan=ctx.dayGan;return ctx.sixLines.year.gan===gan&&ctx.sixLines.month.gan===gan&&ctx.sixLines.hour.gan===gan}",
+      "ruleCount": 2,
+      "rules": [
+        {
+          "index": 81,
+          "ruleId": "tianyuan-yiqi",
+          "name": "天元一气",
+          "category": "特殊格",
+          "priority": 175,
+          "weight": 85,
+          "resultName": "天元一气",
+          "resultCategory": "特殊格",
+          "resultScore": 90,
+          "resultPoGe": false
+        },
+        {
+          "index": 104,
+          "ruleId": "tiangan-yiqi",
+          "name": "天干一气",
+          "category": "特殊格",
+          "priority": 98,
+          "weight": 82,
+          "resultName": "天元一气",
+          "resultCategory": "特殊格",
+          "resultScore": 85,
+          "resultPoGe": false
+        }
+      ],
+      "analysis": {
+        "prioritySame": false,
+        "nameSame": false,
+        "categorySame": true,
+        "resultSame": true
+      }
+    },
+    {
+      "conditionLength": 131,
+      "conditionPreview": "ctx=>{const zhi=ctx.sixLines.day.zhi;return ctx.sixLines.year.zhi===zhi&&ctx.sixLines.month.zhi===zhi&&ctx.sixLines.hour.zhi===zhi}",
+      "ruleCount": 2,
+      "rules": [
+        {
+          "index": 82,
+          "ruleId": "diyuan-yiqi",
+          "name": "地元一气",
+          "category": "特殊格",
+          "priority": 172,
+          "weight": 82,
+          "resultName": "地元一气",
+          "resultCategory": "特殊格",
+          "resultScore": 85,
+          "resultPoGe": false
+        },
+        {
+          "index": 105,
+          "ruleId": "dizhi-yiqi",
+          "name": "地支一气",
+          "category": "特殊格",
+          "priority": 96,
+          "weight": 80,
+          "resultName": "地元一气",
+          "resultCategory": "特殊格",
+          "resultScore": 82,
+          "resultPoGe": false
+        }
+      ],
+      "analysis": {
+        "prioritySame": false,
+        "nameSame": false,
+        "categorySame": true,
+        "resultSame": true
+      }
+    }
+  ]
+}

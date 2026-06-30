@@ -2,16 +2,7 @@
   "count": 15,
   "rules": [
     {
-      "ruleId": "zhen-cong-guansha",
-      "name": "真从官杀格",
-      "priority": 195,
-      "category": "从格",
-      "executionCount": 8000,
-      "matchCount": 0,
-      "errorCount": 0,
-      "lastError": null
-    },
-    {
+      "index": 6,
       "ruleId": "qiming-congsha",
       "name": "弃命从杀",
       "priority": 185,
@@ -19,19 +10,29 @@
       "executionCount": 8000,
       "matchCount": 0,
       "errorCount": 0,
-      "lastError": null
+      "lastError": null,
+      "missReasons": [
+        "测试数据覆盖不足（需构造专用Case）"
+      ],
+      "conditionSource": "ctx=>{const guanShaElement=BE_OVERCOME[ctx.dayElement];return ctx.monthElement===guanShaElement&&ctx.strengthScore<15&&!ctx.hasTongGen&&ctx.monthGanShen===\"\\u504F\\u5B98\"}"
     },
     {
-      "ruleId": "cong-yin-zhen",
-      "name": "从印格",
-      "priority": 180,
+      "index": 9,
+      "ruleId": "qiming-congcai",
+      "name": "弃命从财",
+      "priority": 185,
       "category": "从格",
-      "executionCount": 16000,
+      "executionCount": 8000,
       "matchCount": 0,
       "errorCount": 0,
-      "lastError": null
+      "lastError": null,
+      "missReasons": [
+        "测试数据覆盖不足（需构造专用Case）"
+      ],
+      "conditionSource": "ctx=>{return ctx.monthElement===OVERCOME[ctx.dayElement]&&ctx.strengthScore<15&&!ctx.hasTongGen&&(ctx.monthGanShen===\"\\u6B63\\u8D22\"||ctx.monthGanShen===\"\\u504F\\u8D22\")}"
     },
     {
+      "index": 72,
       "ruleId": "feitian-luma",
       "name": "飞天禄马",
       "priority": 180,
@@ -39,29 +40,14 @@
       "executionCount": 8000,
       "matchCount": 0,
       "errorCount": 0,
-      "lastError": null
+      "lastError": null,
+      "missReasons": [
+        "飞天禄马: 需庚日+子时+特殊组合"
+      ],
+      "conditionSource": "ctx=>{const dayZhi=ctx.sixLines.day.zhi;const ziCount=[ctx.sixLines.year.zhi,ctx.sixLines.month.zhi,ctx.sixLines.day.zhi,ctx.sixLines.hour.zhi].filter(z=>z===\"\\u5B50\").length;return dayZhi===\"\\u5B50\"&&ziCount>=3&&ctx.dayGan===\"\\u5E9A\"}"
     },
     {
-      "ruleId": "hanming-tiaohou",
-      "name": "寒命调候格",
-      "priority": 175,
-      "category": "调候格",
-      "executionCount": 8000,
-      "matchCount": 0,
-      "errorCount": 0,
-      "lastError": null
-    },
-    {
-      "ruleId": "nuanming-tiaohou",
-      "name": "暖命调候格",
-      "priority": 175,
-      "category": "调候格",
-      "executionCount": 8000,
-      "matchCount": 0,
-      "errorCount": 0,
-      "lastError": null
-    },
-    {
+      "index": 83,
       "ruleId": "liangshen-chengxiang",
       "name": "两神成象",
       "priority": 168,
@@ -69,9 +55,14 @@
       "executionCount": 8000,
       "matchCount": 0,
       "errorCount": 0,
-      "lastError": null
+      "lastError": null,
+      "missReasons": [
+        "两神成象: 需五行恰好2种"
+      ],
+      "conditionSource": "ctx=>{const fes=Object.entries(ctx.fiveElementCount).filter(([,v])=>v>0);return fes.length===2}"
     },
     {
+      "index": 85,
       "ruleId": "jinbai-shuiqing",
       "name": "金白水清",
       "priority": 162,
@@ -79,9 +70,14 @@
       "executionCount": 8000,
       "matchCount": 0,
       "errorCount": 0,
-      "lastError": null
+      "lastError": null,
+      "missReasons": [
+        "金白水清: 需金日+金水旺+无火"
+      ],
+      "conditionSource": "ctx=>{if(ctx.dayElement!==\"\\u91D1\")return false;const fes=ctx.fiveElementCount;return fes[\"\\u91D1\"]>=2&&fes[\"\\u6C34\"]>=2&&fes[\"\\u706B\"]===0}"
     },
     {
+      "index": 86,
       "ruleId": "muhuo-tongming",
       "name": "木火通明",
       "priority": 160,
@@ -89,9 +85,14 @@
       "executionCount": 8000,
       "matchCount": 0,
       "errorCount": 0,
-      "lastError": null
+      "lastError": null,
+      "missReasons": [
+        "木火通明: 需木日+木火旺+无金"
+      ],
+      "conditionSource": "ctx=>{if(ctx.dayElement!==\"\\u6728\")return false;const fes=ctx.fiveElementCount;return fes[\"\\u6728\"]>=2&&fes[\"\\u706B\"]>=2&&fes[\"\\u91D1\"]===0}"
     },
     {
+      "index": 87,
       "ruleId": "shuihuo-jiji",
       "name": "水火既济",
       "priority": 158,
@@ -99,19 +100,14 @@
       "executionCount": 8000,
       "matchCount": 0,
       "errorCount": 0,
-      "lastError": null
+      "lastError": null,
+      "missReasons": [
+        "测试数据覆盖不足（需构造专用Case）"
+      ],
+      "conditionSource": "ctx=>{const fes=ctx.fiveElementCount;return fes[\"\\u6C34\"]>=2&&fes[\"\\u706B\"]>=2&&Math.abs(fes[\"\\u6C34\"]-fes[\"\\u706B\"])<=1}"
     },
     {
-      "ruleId": "zhen-cong-shi",
-      "name": "真从势格",
-      "priority": 158,
-      "category": "从格",
-      "executionCount": 8000,
-      "matchCount": 0,
-      "errorCount": 0,
-      "lastError": null
-    },
-    {
+      "index": 88,
       "ruleId": "huotu-chengci",
       "name": "火土成慈",
       "priority": 156,
@@ -119,9 +115,14 @@
       "executionCount": 8000,
       "matchCount": 0,
       "errorCount": 0,
-      "lastError": null
+      "lastError": null,
+      "missReasons": [
+        "测试数据覆盖不足（需构造专用Case）"
+      ],
+      "conditionSource": "ctx=>{if(ctx.dayElement!==\"\\u706B\")return false;const fes=ctx.fiveElementCount;return fes[\"\\u706B\"]>=2&&fes[\"\\u571F\"]>=2&&fes[\"\\u6C34\"]===0}"
     },
     {
+      "index": 89,
       "ruleId": "jinhan-shuiling",
       "name": "金寒水冷",
       "priority": 154,
@@ -129,19 +130,14 @@
       "executionCount": 8000,
       "matchCount": 0,
       "errorCount": 0,
-      "lastError": null
+      "lastError": null,
+      "missReasons": [
+        "测试数据覆盖不足（需构造专用Case）"
+      ],
+      "conditionSource": "ctx=>{if(ctx.dayElement!==\"\\u91D1\")return false;if(ctx.monthElement!==\"\\u6C34\")return false;const fes=ctx.fiveElementCount;return fes[\"\\u91D1\"]>=2&&fes[\"\\u6C34\"]>=2&&fes[\"\\u706B\"]===0}"
     },
     {
-      "ruleId": "zhen-cong-sha",
-      "name": "真从杀格",
-      "priority": 142,
-      "category": "从格",
-      "executionCount": 8000,
-      "matchCount": 0,
-      "errorCount": 0,
-      "lastError": null
-    },
-    {
+      "index": 98,
       "ruleId": "liangqi-chengxiang",
       "name": "两气成象",
       "priority": 112,
@@ -149,8 +145,86 @@
       "executionCount": 8000,
       "matchCount": 0,
       "errorCount": 0,
-      "lastError": null
+      "lastError": null,
+      "missReasons": [
+        "测试数据覆盖不足（需构造专用Case）"
+      ],
+      "conditionSource": "ctx=>{const ZHI_ELEMENT={\"\\u5B50\":\"\\u6C34\",\"\\u4E11\":\"\\u571F\",\"\\u5BC5\":\"\\u6728\",\"\\u536F\":\"\\u6728\",\"\\u8FB0\":\"\\u571F\",\"\\u5DF3\":\"\\u706B\",\"\\u5348\":\"\\u706B\",\"\\u672A\":\"\\u571F\",\"\\u7533\":\"\\u91D1\",\"\\u9149\":\"\\u91D1\",\"\\u620C\":\"\\u571F\",\"\\u4EA5\":\"\\u6C34\"};const ganEls=new Set([getElement(ctx.sixLines.year.gan),ge"
+    },
+    {
+      "index": 108,
+      "ruleId": "zhen-cong-guansha",
+      "name": "真从官杀格",
+      "priority": 195,
+      "category": "从格",
+      "executionCount": 8000,
+      "matchCount": 0,
+      "errorCount": 0,
+      "lastError": null,
+      "missReasons": [
+        "测试数据覆盖不足（需构造专用Case）"
+      ],
+      "conditionSource": "ctx=>{const guanShaElement=BE_OVERCOME[ctx.dayElement];return ctx.monthElement===guanShaElement&&ctx.strengthScore<15&&!ctx.hasTongGen&&ctx.diffPartyCount>=4}"
+    },
+    {
+      "index": 116,
+      "ruleId": "zhen-cong-shi",
+      "name": "真从势格",
+      "priority": 158,
+      "category": "从格",
+      "executionCount": 8000,
+      "matchCount": 0,
+      "errorCount": 0,
+      "lastError": null,
+      "missReasons": [
+        "测试数据覆盖不足（需构造专用Case）"
+      ],
+      "conditionSource": "ctx=>{return ctx.strengthScore<12&&!ctx.hasTongGen&&ctx.diffPartyCount>=4}"
+    },
+    {
+      "index": 123,
+      "ruleId": "zhen-cong-sha",
+      "name": "真从杀格",
+      "priority": 142,
+      "category": "从格",
+      "executionCount": 8000,
+      "matchCount": 0,
+      "errorCount": 0,
+      "lastError": null,
+      "missReasons": [
+        "测试数据覆盖不足（需构造专用Case）"
+      ],
+      "conditionSource": "ctx=>{const shaElement=BE_OVERCOME[ctx.dayElement];return ctx.monthElement===shaElement&&ctx.strengthScore<12&&!ctx.hasTongGen&&ctx.diffPartyCount>=4}"
+    },
+    {
+      "index": 131,
+      "ruleId": "hanming-tiaohou",
+      "name": "寒命调候格",
+      "priority": 175,
+      "category": "调候格",
+      "executionCount": 8000,
+      "matchCount": 0,
+      "errorCount": 0,
+      "lastError": null,
+      "missReasons": [
+        "寒命调候: 需冬月+无火调候"
+      ],
+      "conditionSource": "ctx=>{const donghanZhi=[\"\\u5B50\",\"\\u4EA5\",\"\\u4E11\"];const hasHuo=ctx.fiveElementCount[\"\\u706B\"]||0;return donghanZhi.includes(ctx.monthZhi)&&hasHuo===0&&ctx.strengthScore<50}"
+    },
+    {
+      "index": 132,
+      "ruleId": "nuanming-tiaohou",
+      "name": "暖命调候格",
+      "priority": 175,
+      "category": "调候格",
+      "executionCount": 8000,
+      "matchCount": 0,
+      "errorCount": 0,
+      "lastError": null,
+      "missReasons": [
+        "暖命调候: 需夏月+无水调候"
+      ],
+      "conditionSource": "ctx=>{const xialieZhi=[\"\\u5348\",\"\\u5DF3\",\"\\u672A\"];const hasShui=ctx.fiveElementCount[\"\\u6C34\"]||0;return xialieZhi.includes(ctx.monthZhi)&&hasShui===0&&ctx.strengthScore<50}"
     }
-  ],
-  "generatedAt": "2026-06-30T03:12:36.724Z"
+  ]
 }

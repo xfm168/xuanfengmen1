@@ -1,0 +1,257 @@
+{
+  "timestamp": "2026-06-30T03:23:24.042Z",
+  "totalRuleContextCount": 8000,
+  "totalRuleCount": 150,
+  "uniqueRuleIdCount": 149,
+  "duplicateIdCount": 1,
+  "matchedRuleCount": 135,
+  "unmatchedRuleCount": 15,
+  "erroredRuleCount": 0,
+  "coveragePercent": "90.0",
+  "summary": {
+    "topMatched": [
+      {
+        "uniqueKey": "149-default-putong",
+        "name": "普通格局",
+        "matchCount": 8000,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "68-geju-chenggong",
+        "name": "格局成-用神有力",
+        "matchCount": 4598,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "17-fu-yi-ge",
+        "name": "扶抑格",
+        "matchCount": 4405,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "136-bijie-tongguan",
+        "name": "比劫通关格",
+        "matchCount": 4086,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "16-bing-yao-ge",
+        "name": "病药格",
+        "matchCount": 3402,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "141-geju-zhongdeng",
+        "name": "格局中等",
+        "matchCount": 3395,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "14-tiao-hou-zuoyong",
+        "name": "调候格",
+        "matchCount": 2702,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "134-bingyao-xiangji",
+        "name": "病药相济格",
+        "matchCount": 2482,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "15-hannuan-zaoshi",
+        "name": "寒暖燥湿格",
+        "matchCount": 2125,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "90-caiguan-shuangmei",
+        "name": "财官双美",
+        "matchCount": 2023,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "67-geju-gao-tiaohou",
+        "name": "格局高-调候为急",
+        "matchCount": 1628,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "66-geju-gao-wanzheng",
+        "name": "格局高-完美成格",
+        "matchCount": 1602,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "133-bingzhong-yaoqing",
+        "name": "病重药轻格",
+        "matchCount": 1545,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "142-geju-xiadeng",
+        "name": "格局下等",
+        "matchCount": 1545,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "143-fuyi-fushen",
+        "name": "扶抑格-扶身",
+        "matchCount": 1520,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "69-geju-bai",
+        "name": "格局败-偏枯太重",
+        "matchCount": 1453,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "147-qingcun-cai",
+        "name": "清纯-财星清",
+        "matchCount": 1312,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "114-ban-cong",
+        "name": "半从格",
+        "matchCount": 896,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "22-pian-yin-tou",
+        "name": "偏印格",
+        "matchCount": 827,
+        "executionCount": 8000
+      },
+      {
+        "uniqueKey": "25-zheng-cai-tou",
+        "name": "正财格",
+        "matchCount": 817,
+        "executionCount": 8000
+      }
+    ],
+    "allUnmatched": [
+      {
+        "uniqueKey": "6-qiming-congsha",
+        "name": "弃命从杀",
+        "priority": 185,
+        "missReasons": [
+          "测试数据覆盖不足（需构造专用Case）"
+        ]
+      },
+      {
+        "uniqueKey": "9-qiming-congcai",
+        "name": "弃命从财",
+        "priority": 185,
+        "missReasons": [
+          "测试数据覆盖不足（需构造专用Case）"
+        ]
+      },
+      {
+        "uniqueKey": "72-feitian-luma",
+        "name": "飞天禄马",
+        "priority": 180,
+        "missReasons": [
+          "飞天禄马: 需庚日+子时+特殊组合"
+        ]
+      },
+      {
+        "uniqueKey": "83-liangshen-chengxiang",
+        "name": "两神成象",
+        "priority": 168,
+        "missReasons": [
+          "两神成象: 需五行恰好2种"
+        ]
+      },
+      {
+        "uniqueKey": "85-jinbai-shuiqing",
+        "name": "金白水清",
+        "priority": 162,
+        "missReasons": [
+          "金白水清: 需金日+金水旺+无火"
+        ]
+      },
+      {
+        "uniqueKey": "86-muhuo-tongming",
+        "name": "木火通明",
+        "priority": 160,
+        "missReasons": [
+          "木火通明: 需木日+木火旺+无金"
+        ]
+      },
+      {
+        "uniqueKey": "87-shuihuo-jiji",
+        "name": "水火既济",
+        "priority": 158,
+        "missReasons": [
+          "测试数据覆盖不足（需构造专用Case）"
+        ]
+      },
+      {
+        "uniqueKey": "88-huotu-chengci",
+        "name": "火土成慈",
+        "priority": 156,
+        "missReasons": [
+          "测试数据覆盖不足（需构造专用Case）"
+        ]
+      },
+      {
+        "uniqueKey": "89-jinhan-shuiling",
+        "name": "金寒水冷",
+        "priority": 154,
+        "missReasons": [
+          "测试数据覆盖不足（需构造专用Case）"
+        ]
+      },
+      {
+        "uniqueKey": "98-liangqi-chengxiang",
+        "name": "两气成象",
+        "priority": 112,
+        "missReasons": [
+          "测试数据覆盖不足（需构造专用Case）"
+        ]
+      },
+      {
+        "uniqueKey": "108-zhen-cong-guansha",
+        "name": "真从官杀格",
+        "priority": 195,
+        "missReasons": [
+          "测试数据覆盖不足（需构造专用Case）"
+        ]
+      },
+      {
+        "uniqueKey": "116-zhen-cong-shi",
+        "name": "真从势格",
+        "priority": 158,
+        "missReasons": [
+          "测试数据覆盖不足（需构造专用Case）"
+        ]
+      },
+      {
+        "uniqueKey": "123-zhen-cong-sha",
+        "name": "真从杀格",
+        "priority": 142,
+        "missReasons": [
+          "测试数据覆盖不足（需构造专用Case）"
+        ]
+      },
+      {
+        "uniqueKey": "131-hanming-tiaohou",
+        "name": "寒命调候格",
+        "priority": 175,
+        "missReasons": [
+          "寒命调候: 需冬月+无火调候"
+        ]
+      },
+      {
+        "uniqueKey": "132-nuanming-tiaohou",
+        "name": "暖命调候格",
+        "priority": 175,
+        "missReasons": [
+          "暖命调候: 需夏月+无水调候"
+        ]
+      }
+    ]
+  }
+}
