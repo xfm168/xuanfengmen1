@@ -273,6 +273,8 @@ export interface FengShuiRule extends BaseRule<FengShuiContext, FengShuiRuleResu
   weight: number
   confidence: number
   
+  referenceIds: string[]
+  
   condition: (ctx: FengShuiContext) => boolean
   
   result: FengShuiRuleResult
