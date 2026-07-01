@@ -37,83 +37,62 @@ export class SupabaseEdgeProvider extends BaseAIProvider {
   ): Promise<AIResponse> {
     this.assertMessages(messages)
 
-    const {
-      retryCount = 2,
-      timeoutMs = 60000,
-      metadata = {},
-    } = options
+    const { metadata = {} } = options
 
     const functionPath = this.config.functionPath
       ? this.config.functionPath
       : `${this.config.supabaseUrl}/functions/v1/${this.config.functionName || 'analyze'}`
 
-    const execute = async (): Promise<AIResponse> => {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+    return this.withTimeoutAndRetry(async (signal) => {
+      const response = await fetch(functionPath, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.config.anonKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages,
+          model: options.model,
+          temperature: options.temperature,
+          maxTokens: options.maxTokens,
+          metadata,
+        }),
+        signal,
+      })
 
-      try {
-        const response = await fetch(functionPath, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${this.config.anonKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            messages,
-            model: options.model,
-            temperature: options.temperature,
-            maxTokens: options.maxTokens,
-            metadata,
-          }),
-          signal: controller.signal,
-        })
-
-        if (!response.ok) {
-          if (response.status === 429) {
-            throw AIError.RateLimit(this.type)
-          }
-          if (response.status >= 500) {
-            throw AIError.ProviderUnavailable(
-              this.type,
-              new Error(`HTTP ${response.status}`)
-            )
-          }
-          throw new AIError(
-            `Edge function returned ${response.status}`,
-            'HTTP_ERROR',
-            this.type
+      if (!response.ok) {
+        if (response.status === 429) throw AIError.RateLimit(this.type)
+        if (response.status >= 500) {
+          throw AIError.ProviderUnavailable(
+            this.type,
+            new Error(`HTTP ${response.status}`)
           )
         }
-
-        const data = await response.json()
-
-        if (data.error) {
-          throw new AIError(
-            data.error,
-            'AI_ERROR',
-            this.type
-          )
-        }
-
-        return {
-          content: data.content ?? data.result ?? data.answer ?? '',
-          model: (data.model as AIModel) || 'supabase-edge',
-          provider: this.type,
-          usage: data.usage,
-          raw: data,
-        }
-      } catch (err) {
-        if (err instanceof AIError) throw err
-        if (err instanceof Error && err.name === 'AbortError') {
-          throw AIError.Timeout(this.type, err)
-        }
-        throw AIError.ProviderUnavailable(this.type, err)
-      } finally {
-        clearTimeout(timeoutId)
+        throw new AIError(
+          `Edge function returned ${response.status}`,
+          'HTTP_ERROR',
+          this.type
+        )
       }
-    }
 
-    return this.withRetry(execute, retryCount, 2000)
+      const data = await response.json()
+
+      if (data.error) {
+        throw new AIError(
+          data.error,
+          'AI_ERROR',
+          this.type
+        )
+      }
+
+      return {
+        content: data.content ?? data.result ?? data.answer ?? '',
+        model: (data.model as AIModel) || 'supabase-edge',
+        provider: this.type,
+        usage: data.usage,
+        raw: data,
+      }
+    }, options)
   }
 
   async callFunction<T = unknown>(

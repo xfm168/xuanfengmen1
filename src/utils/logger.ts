@@ -15,8 +15,8 @@ interface LogEntry {
   data?: unknown
 }
 
-/** Whether to enable debug logs (controlled by environment) */
-const DEBUG_ENABLED = import.meta.env?.DEV ?? false
+/** Whether running in development mode */
+const IS_DEV = import.meta.env?.DEV ?? false
 
 /** Log context prefix for module identification */
 const APP_PREFIX = '[玄风]'
@@ -44,9 +44,12 @@ function log(level: LogLevel, message: string, context?: string, data?: unknown)
 
   const formatted = formatEntry(entry)
 
-  // In production, only log errors
-  if (!DEBUG_ENABLED && level !== 'error') {
-    return
+  // Development: output all levels
+  // Production: only warn and error (debug and info are suppressed)
+  if (!IS_DEV) {
+    if (level !== 'warn' && level !== 'error') {
+      return
+    }
   }
 
   switch (level) {
