@@ -1,8 +1,14 @@
 /**
  * @deprecated
- * 保留用于未来 Premium / 实验功能。
- * 当前正式版不会调用。
- * 若未来未重新启用，可在 V5 删除。
+ *
+ * Experimental module.
+ *
+ * Reserved for:
+ * - Premium Simulation
+ * - AB Test
+ * - Future Interactive Layout
+ *
+ * Do not use in production pipeline.
  */
 
 import type { FengShuiContext } from '../types'

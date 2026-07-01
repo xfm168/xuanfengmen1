@@ -1,16 +1,16 @@
 /**
- * 玄风风水模块 V4.4
+ * 玄风风水模块 V4.4 Release
  * 
- * 唯一 Pipeline（禁止绕过）：
- * 图片 → Vision Engine → FloorPlan Engine → Spatial Engine → Furniture Engine
- * → Room Engine → Feature Engine → Rule Engine → Score Engine → Knowledge Base
- * → Explain Engine → AI Report → Frontend
+ * Architecture:
+ * Pipeline → Feature → Rule → Knowledge → Evidence → Report
  * 
- * 核心特性：
- * - 101条精品规则（按房间分类管理）
- * - 知识库（古籍/案例/植物/颜色/材料/符号）
- * - 固定12章节报告模板
- * - 证据链（结论→Rule→古籍→改善→预计提升）
+ * Modules:
+ * - Pipeline: Unified entry point (runFullPipeline)
+ * - Vision Module: Integrated into Pipeline
+ * - Deprecated Simulation: Reserved for Premium/AB Test
+ * - AI Provider: OpenAI/Gemini/Supabase Edge (unified timeout)
+ * - Rule Engine: 101 rules (ALL_RULES)
+ * - Knowledge Base: 76 entries (knowledgeBase)
  * 
  * @example
  * // 图片分析完整流程（推荐入口）

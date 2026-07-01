@@ -70,6 +70,10 @@ function log(level: LogLevel, message: string, context?: string, data?: unknown)
 
 /**
  * Unified Logger API
+ * 
+ * Environment behavior:
+ * - Development: all levels (debug, info, warn, error)
+ * - Production: warn and error only
  */
 export const logger = {
   /**
@@ -80,7 +84,7 @@ export const logger = {
   },
 
   /**
-   * Log warning (visible in dev, suppressed in prod)
+   * Log warning (visible in dev and prod)
    */
   warn(message: string, context?: string, data?: unknown): void {
     log('warn', message, context, data)
@@ -102,13 +106,32 @@ export const logger = {
 
   /**
    * Create a scoped logger for a specific module
+   * Alias for child()
    */
   scope(context: string) {
+    return this.child(context)
+  },
+
+  /**
+   * Create a child logger with fixed context
+   * 
+   * Reserved for:
+   * - Pipeline Logger
+   * - AI Logger
+   * - Rule Logger
+   * - Knowledge Logger
+   * 
+   * @example
+   * const pipelineLogger = logger.child('Pipeline')
+   * pipelineLogger.info('Step completed')
+   * // Output: [Pipeline] Step completed
+   */
+  child(context: string) {
     return {
-      error: (message: string, data?: unknown) => this.error(message, context, data),
-      warn: (message: string, data?: unknown) => this.warn(message, context, data),
-      info: (message: string, data?: unknown) => this.info(message, context, data),
-      debug: (message: string, data?: unknown) => this.debug(message, context, data),
+      error: (message: string, data?: unknown) => log('error', message, context, data),
+      warn: (message: string, data?: unknown) => log('warn', message, context, data),
+      info: (message: string, data?: unknown) => log('info', message, context, data),
+      debug: (message: string, data?: unknown) => log('debug', message, context, data),
     }
   },
 }

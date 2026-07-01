@@ -1,6 +1,7 @@
-import { CSSProperties } from 'react'
+import { CSSProperties, useEffect } from 'react'
 import Compass from '../components/business/Compass/Compass'
 import FeatureCard from '../components/business/FeatureCard/FeatureCard'
+import { RELEASE_BANNER } from '../config/release'
 import './Home.css'
 
 const featureCards = [
@@ -31,6 +32,13 @@ const featureCards = [
 ]
 
 export default function Home() {
+  // Print release banner in development mode only
+  useEffect(() => {
+    if (import.meta.env?.DEV) {
+      console.log(RELEASE_BANNER)
+    }
+  }, [])
+
   return (
     <div className="home">
 
