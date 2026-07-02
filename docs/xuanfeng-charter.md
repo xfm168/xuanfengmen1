@@ -125,10 +125,10 @@ Acceptance Gate 必须全部通过以下 6 项：
 
 任一项未通过，**禁止进入下一模块**。
 
-#### 6.1 算法类模块的四层共同校验
+#### 6.1 算法类模块的多层质量验证体系
 
 对于传统命理算法类模块（节气、四柱、格局等），Acceptance ① Accuracy Report
-必须同时覆盖以下四层校验，缺一不可：
+必须经过"多层质量验证体系"验证，当前默认采用四层校验（缺一不可）：
 
 | 层级 | 校验内容 | 说明 |
 |------|---------|------|
@@ -140,8 +140,15 @@ Acceptance Gate 必须全部通过以下 6 项：
 > P0-① 验收中发现大寒月支 BUG，证明仅靠前三层不足以保证正确性。
 > 第四层真实命例验证是发现"算法自洽但结论错误"的关键手段。
 >
+> 本体系为开放式设计，未来可根据项目发展持续扩展新的验证层，例如：
+> - AI Cross Validation（AI 交叉验证）
+> - Master Review（专家审核）
+> - User Feedback Validation（真实用户反馈）
+> - A/B Accuracy Test（版本准确率对比）
+>
 > 相关想法：[IDEA-006 黄金命例库](file:///workspace/docs/future-ideas.md#idea-006黄金命例库gold-case-library)、
-> [IDEA-010 四层校验规范](file:///workspace/docs/future-ideas.md#idea-010传统命理算法四层校验规范)
+> [IDEA-010 四层校验规范](file:///workspace/docs/future-ideas.md#idea-010传统命理算法四层校验规范)、
+> [IDEA-011 多层质量验证体系](file:///workspace/docs/future-ideas.md#idea-011多层质量验证体系)
 
 ---
 
