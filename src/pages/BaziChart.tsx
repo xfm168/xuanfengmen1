@@ -4,12 +4,12 @@ import { PageTitle, Card, Badge, Button, Loading } from '../components/ui'
 import { ScoreRing, ScoreBar } from '../components/business'
 import { useBazi } from '../hooks/useBazi'
 import { useAIAnalysis } from '../hooks/useAIAnalysis'
-import { calculateBaZiFromBirthData, type FiveElement, type BaZiAnalysis, determineGeJu, type GeJuResult } from '../lib/bazi'
+import { calculateBaZiFromBirthData, type FiveElement, type BaZiAnalysis, determineGeJu, type GeJuResult, calculateShenSha, type ShenShaCategory } from '../lib/bazi'
 import { DEFAULT_BAZI_ANALYSIS } from '../constants/defaultAnalysis'
 import type { BirthData } from '@/lib/core'
 import './BaziChart.css'
 
-type TabKey = 'overview' | 'wuxing' | 'shenshi' | 'wangshuai' | 'geju' | 'xiyong' | 'analysis'
+type TabKey = 'overview' | 'wuxing' | 'shenshi' | 'wangshuai' | 'geju' | 'shensha' | 'xiyong' | 'analysis'
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'overview', label: '命盘' },
@@ -17,6 +17,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'shenshi', label: '十神' },
   { key: 'wangshuai', label: '旺衰' },
   { key: 'geju', label: '格局' },
+  { key: 'shensha', label: '神煞' },
   { key: 'xiyong', label: '喜用神' },
   { key: 'analysis', label: '解析' },
 ]
@@ -106,6 +107,12 @@ export default function BaziChart() {
     dayMaster.dayGan,
     sixLines.month.zhi,
     fiveElementCount,
+  )
+
+  const shenSha = calculateShenSha(
+    sixLines,
+    dayMaster.dayGan,
+    chartBirth.gender,
   )
 
   function handleSave() {
@@ -306,6 +313,33 @@ export default function BaziChart() {
               </div>
               <p className="geju-desc">{geJu.description}</p>
             </Card>
+          )}
+
+          {activeTab === 'shensha' && (
+            <div className="bazi-shensha-list">
+              {shenSha.map(category => (
+                <Card key={category.name} className="bazi-shensha-card">
+                  <h3 className="card-title">{category.name}</h3>
+                  <div className="shensha-items">
+                    {category.items.map((item, idx) => (
+                      <div
+                        key={item.name + idx}
+                        className={`shensha-item ${item.inPosition ? 'shensha-item--hit' : ''}`}
+                      >
+                        <div className="shensha-header">
+                          <span className="shensha-name">{item.name}</span>
+                          <Badge variant={item.inPosition ? 'success' : 'default'} size="sm">
+                            {item.inPosition ? '命中' : '无'}
+                          </Badge>
+                        </div>
+                        <p className="shensha-position">位置：{item.position}</p>
+                        <p className="shensha-desc">{item.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              ))}
+            </div>
           )}
 
           {activeTab === 'xiyong' && (

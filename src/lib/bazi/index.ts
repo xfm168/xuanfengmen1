@@ -71,5 +71,9 @@ export type { BaZiKnowledgeEntry, KnowledgeStats, KnowledgeCategory } from './kn
 export { determineGeJu } from './geju'
 export type { GeJuResult } from './geju'
 
+// ShenSha (神煞系统)
+export { calculateShenSha } from './shensha'
+export type { ShenShaInfo, ShenShaCategory } from './shensha'
+
 // P0-② 子时换日模块
 export * from './zishi'
