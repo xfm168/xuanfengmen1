@@ -79,5 +79,9 @@ export type { ShenShaInfo, ShenShaCategory } from './shensha'
 export { analyzeShenShi } from './shishenAnalysis'
 export type { ShenShiDetail, ShenShiAnalysisResult, ShenShiPower, ShenShiCombination } from './shishenAnalysis'
 
+// FiveElement Power (五行力量分析)
+export { calculateFiveElementPower } from './fiveElementPower'
+export type { ElementPowerDetail, FiveElementPowerResult } from './fiveElementPower'
+
 // P0-② 子时换日模块
 export * from './zishi'

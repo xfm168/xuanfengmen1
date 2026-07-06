@@ -4,7 +4,7 @@ import { PageTitle, Card, Badge, Button, Loading } from '../components/ui'
 import { ScoreRing, ScoreBar } from '../components/business'
 import { useBazi } from '../hooks/useBazi'
 import { useAIAnalysis } from '../hooks/useAIAnalysis'
-import { calculateBaZiFromBirthData, type FiveElement, type BaZiAnalysis, determineGeJu, type GeJuResult, calculateShenSha, type ShenShaCategory, analyzeShenShi, type ShenShiAnalysisResult } from '../lib/bazi'
+import { calculateBaZiFromBirthData, type FiveElement, type BaZiAnalysis, determineGeJu, type GeJuResult, calculateShenSha, type ShenShaCategory, analyzeShenShi, type ShenShiAnalysisResult, calculateFiveElementPower } from '../lib/bazi'
 import { DEFAULT_BAZI_ANALYSIS } from '../constants/defaultAnalysis'
 import type { BirthData } from '@/lib/core'
 import './BaziChart.css'
@@ -28,6 +28,33 @@ const ELEMENT_COLORS: Record<FiveElement, string> = {
   土: '#c4956a',
   金: '#d4af37',
   水: '#4a7ab8',
+}
+
+function getRadarPoints(scale: number): string {
+  const points: string[] = []
+  for (let i = 0; i < 5; i++) {
+    const angle = (i * 72 - 90) * Math.PI / 180
+    const x = 100 + 80 * scale * Math.cos(angle)
+    const y = 100 + 80 * scale * Math.sin(angle)
+    points.push(`${x},${y}`)
+  }
+  return points.join(' ')
+}
+
+function getRadarDataPoints(power: { elements: { element: FiveElement; percentage: number }[] }): string {
+  const order: FiveElement[] = ['木', '火', '土', '金', '水']
+  const points: string[] = []
+  for (let i = 0; i < 5; i++) {
+    const el = order[i]
+    const detail = power.elements.find(e => e.element === el)
+    const pct = detail ? detail.percentage / 100 : 0
+    const scale = Math.min(pct * 2, 1)
+    const angle = (i * 72 - 90) * Math.PI / 180
+    const x = 100 + 80 * scale * Math.cos(angle)
+    const y = 100 + 80 * scale * Math.sin(angle)
+    points.push(`${x},${y}`)
+  }
+  return points.join(' ')
 }
 
 export default function BaziChart() {
@@ -119,6 +146,11 @@ export default function BaziChart() {
     sixLines,
     dayMaster.dayGan,
     chartBirth.gender,
+  )
+
+  const fiveElementPower = calculateFiveElementPower(
+    sixLines,
+    dayMaster.dayGan,
   )
 
   function handleSave() {
@@ -215,25 +247,159 @@ export default function BaziChart() {
           )}
 
           {activeTab === 'wuxing' && (
-            <Card className="bazi-wuxing-card">
-              <h3 className="card-title">五行分析</h3>
-              <div className="wuxing-list">
-                {(['木', '火', '土', '金', '水'] as FiveElement[]).map(el => (
-                  <div key={el} className="wuxing-item">
-                    <div className="wuxing-header">
-                      <span className="wuxing-name" style={{ color: ELEMENT_COLORS[el] }}>
-                        {el}
-                      </span>
-                      <span className="wuxing-count">{fiveElementCount[el].toFixed(1)}</span>
-                    </div>
-                    <ScoreBar score={(fiveElementCount[el] / 10) * 100} height={8} showValue={false} />
+            <div className="bazi-wuxing-analysis">
+              <Card className="bazi-wuxing-overview-card">
+                <h3 className="card-title">五行力量</h3>
+                <div className="wuxing-overview-summary">
+                  <div className="wuxing-overview-item">
+                    <p className="wuxing-overview-label">最旺</p>
+                    <span className="wuxing-overview-value" style={{ color: ELEMENT_COLORS[fiveElementPower.dominant] }}>
+                      {fiveElementPower.dominant}
+                    </span>
                   </div>
-                ))}
-              </div>
-              <p className="wuxing-summary">
-                {xiYongShen.happiness}
-              </p>
-            </Card>
+                  <div className="wuxing-overview-item">
+                    <p className="wuxing-overview-label">最弱</p>
+                    <span className="wuxing-overview-value" style={{ color: ELEMENT_COLORS[fiveElementPower.weakest] }}>
+                      {fiveElementPower.weakest}
+                    </span>
+                  </div>
+                  <div className="wuxing-overview-item">
+                    <p className="wuxing-overview-label">得令</p>
+                    <span className="wuxing-overview-value" style={{ color: ELEMENT_COLORS[fiveElementPower.mostWang] }}>
+                      {fiveElementPower.mostWang}
+                    </span>
+                  </div>
+                  <div className="wuxing-overview-item">
+                    <p className="wuxing-overview-label">失令</p>
+                    <span className="wuxing-overview-value" style={{ color: ELEMENT_COLORS[fiveElementPower.mostShuai] }}>
+                      {fiveElementPower.mostShuai}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bazi-wuxing-bar-card">
+                <h3 className="card-title">五行柱状图</h3>
+                <div className="wuxing-bar-chart">
+                  {fiveElementPower.sortedByPower.map(el => {
+                    const detail = fiveElementPower.elements.find(e => e.element === el)
+                    return (
+                      <div key={el} className="wuxing-bar-row">
+                        <div className="wuxing-bar-label" style={{ color: ELEMENT_COLORS[el] }}>
+                          {el}
+                        </div>
+                        <div className="wuxing-bar-track">
+                          <div
+                            className="wuxing-bar-fill"
+                            style={{
+                              width: `${detail?.percentage || 0}%`,
+                              backgroundColor: ELEMENT_COLORS[el],
+                            }}
+                          />
+                        </div>
+                        <div className="wuxing-bar-score">
+                          <span className="wuxing-bar-score-value">{detail?.total || 0}</span>
+                          <span className="wuxing-bar-score-pct">{detail?.percentage || 0}%</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </Card>
+
+              <Card className="bazi-wuxing-radar-card">
+                <h3 className="card-title">五行雷达图</h3>
+                <div className="wuxing-radar-container">
+                  <svg viewBox="0 0 200 200" className="wuxing-radar-svg">
+                    {[0.2, 0.4, 0.6, 0.8, 1].map(scale => (
+                      <polygon
+                        key={scale}
+                        points={getRadarPoints(scale)}
+                        className="wuxing-radar-grid"
+                      />
+                    ))}
+                    {['木', '火', '土', '金', '水'].map((el, i) => {
+                      const angle = (i * 72 - 90) * Math.PI / 180
+                      const x = 100 + 80 * Math.cos(angle)
+                      const y = 100 + 80 * Math.sin(angle)
+                      return (
+                        <line
+                          key={el}
+                          x1="100"
+                          y1="100"
+                          x2={x}
+                          y2={y}
+                          className="wuxing-radar-axis"
+                        />
+                      )
+                    })}
+                    <polygon
+                      points={getRadarDataPoints(fiveElementPower)}
+                      className="wuxing-radar-data"
+                    />
+                    {['木', '火', '土', '金', '水'].map((el, i) => {
+                      const angle = (i * 72 - 90) * Math.PI / 180
+                      const x = 100 + 92 * Math.cos(angle)
+                      const y = 100 + 92 * Math.sin(angle)
+                      return (
+                        <text
+                          key={el}
+                          x={x}
+                          y={y}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          className="wuxing-radar-label"
+                          fill={ELEMENT_COLORS[el as FiveElement]}
+                        >
+                          {el}
+                        </text>
+                      )
+                    })}
+                  </svg>
+                </div>
+              </Card>
+
+              <Card className="bazi-wuxing-detail-card">
+                <h3 className="card-title">五行详表</h3>
+                <div className="wuxing-detail-table">
+                  <div className="wuxing-detail-header">
+                    <span>五行</span>
+                    <span>天干</span>
+                    <span>月令</span>
+                    <span>地支</span>
+                    <span>藏干</span>
+                    <span>通根</span>
+                    <span>旺衰</span>
+                    <span>总分</span>
+                  </div>
+                  {fiveElementPower.sortedByPower.map(el => {
+                    const d = fiveElementPower.elements.find(e => e.element === el)
+                    if (!d) return null
+                    return (
+                      <div key={el} className="wuxing-detail-row">
+                        <span className="wuxing-detail-element" style={{ color: ELEMENT_COLORS[el] }}>
+                          {el}
+                        </span>
+                        <span>{d.fromStems}</span>
+                        <span>{d.fromMonthBen + d.fromMonthZhong + d.fromMonthYao}</span>
+                        <span>{d.fromOtherBen}</span>
+                        <span>{d.fromOtherZhong + d.fromOtherYao}</span>
+                        <span>{d.fromTongGen}</span>
+                        <span className={`wuxing-detail-wangshuai wangshuai-${d.wangShuai}`}>
+                          {d.wangShuai}
+                        </span>
+                        <span className="wuxing-detail-total">{d.total}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </Card>
+
+              <Card className="bazi-wuxing-summary-card">
+                <h3 className="card-title">五行总结</h3>
+                <p className="wuxing-summary-text">{xiYongShen.happiness}</p>
+              </Card>
+            </div>
           )}
 
           {activeTab === 'shenshi' && (
