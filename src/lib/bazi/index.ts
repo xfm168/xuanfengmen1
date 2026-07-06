@@ -75,5 +75,9 @@ export type { GeJuResult } from './geju'
 export { calculateShenSha } from './shensha'
 export type { ShenShaInfo, ShenShaCategory } from './shensha'
 
+// ShenShi Analysis (十神分析系统)
+export { analyzeShenShi } from './shishenAnalysis'
+export type { ShenShiDetail, ShenShiAnalysisResult, ShenShiPower, ShenShiCombination } from './shishenAnalysis'
+
 // P0-② 子时换日模块
 export * from './zishi'

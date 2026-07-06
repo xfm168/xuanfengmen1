@@ -4,7 +4,7 @@ import { PageTitle, Card, Badge, Button, Loading } from '../components/ui'
 import { ScoreRing, ScoreBar } from '../components/business'
 import { useBazi } from '../hooks/useBazi'
 import { useAIAnalysis } from '../hooks/useAIAnalysis'
-import { calculateBaZiFromBirthData, type FiveElement, type BaZiAnalysis, determineGeJu, type GeJuResult, calculateShenSha, type ShenShaCategory } from '../lib/bazi'
+import { calculateBaZiFromBirthData, type FiveElement, type BaZiAnalysis, determineGeJu, type GeJuResult, calculateShenSha, type ShenShaCategory, analyzeShenShi, type ShenShiAnalysisResult } from '../lib/bazi'
 import { DEFAULT_BAZI_ANALYSIS } from '../constants/defaultAnalysis'
 import type { BirthData } from '@/lib/core'
 import './BaziChart.css'
@@ -110,6 +110,12 @@ export default function BaziChart() {
   )
 
   const shenSha = calculateShenSha(
+    sixLines,
+    dayMaster.dayGan,
+    chartBirth.gender,
+  )
+
+  const shenShiAnalysis = analyzeShenShi(
     sixLines,
     dayMaster.dayGan,
     chartBirth.gender,
@@ -231,20 +237,133 @@ export default function BaziChart() {
           )}
 
           {activeTab === 'shenshi' && (
-            <Card className="bazi-shenshi-card">
-              <h3 className="card-title">十神分析</h3>
-              <p className="shenshi-intro">
-                日主 <strong style={{ color: 'var(--accent)' }}>{dayMaster.dayGan}</strong> 天干十神关系：
-              </p>
-              <div className="shenshi-grid">
-                {(['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'] as const).map(gan => (
-                  <div key={gan} className="shenshi-item">
-                    <div className="shenshi-gan">{gan}</div>
-                    <div className="shenshi-name">{dayMaster.relatedShens[gan]}</div>
+            <div className="bazi-shenshi-analysis">
+              <Card className="bazi-shenshi-overview-card">
+                <h3 className="card-title">十神分析</h3>
+                <div className="shenshi-dominant">
+                  <p className="shenshi-dominant-label">主导十神</p>
+                  <div className="shenshi-dominant-list">
+                    {shenShiAnalysis.dominantShenShi.map((shen, idx) => (
+                      <Badge key={shen + idx} variant="gold" size="md">
+                        {shen}
+                      </Badge>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </Card>
+                </div>
+                <div className="shenshi-sorted">
+                  <p className="shenshi-sorted-label">力量排序</p>
+                  <div className="shenshi-sorted-list">
+                    {shenShiAnalysis.sortedByPower.map((shen, idx) => {
+                      const detail = shenShiAnalysis.details.find(d => d.name === shen)
+                      return (
+                        <div key={shen + idx} className="shenshi-sorted-item">
+                          <span className="shenshi-sorted-rank">{idx + 1}</span>
+                          <span className="shenshi-sorted-name">{shen}</span>
+                          <div className="shenshi-sorted-bar">
+                            <div
+                              className="shenshi-sorted-bar-fill"
+                              style={{ width: `${detail?.power || 0}%` }}
+                            />
+                          </div>
+                          <span className="shenshi-sorted-power">{detail?.power || 0}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bazi-shenshi-details-card">
+                <h3 className="card-title">十神详表</h3>
+                <div className="shenshi-details-grid">
+                  {shenShiAnalysis.details.filter(d => d.power > 0).map(detail => (
+                    <div key={detail.name} className="shenshi-detail-item">
+                      <div className="shenshi-detail-header">
+                        <span className="shenshi-detail-name">{detail.name}</span>
+                        <span className="shenshi-detail-power">{detail.power}分</span>
+                      </div>
+                      <div className="shenshi-detail-tags">
+                        {detail.touGan && <Badge variant="success" size="sm">透干</Badge>}
+                        {detail.deLing && <Badge variant="gold" size="sm">得令</Badge>}
+                        {detail.deDi && <Badge variant="gold" size="sm">得地</Badge>}
+                        {detail.youGen && <Badge variant="default" size="sm">有根</Badge>}
+                        {detail.shouZhi && <Badge variant="error" size="sm">受制</Badge>}
+                      </div>
+                      <p className="shenshi-detail-position">
+                        位置：{detail.position.length > 0 ? detail.position.join('、') : '无'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Card className="bazi-shenshi-personality-card">
+                <h3 className="card-title">人格分析</h3>
+                <div className="shenshi-personality-traits">
+                  {shenShiAnalysis.personalityTraits.map((trait, idx) => (
+                    <Badge key={idx} variant="gold" size="sm">
+                      {trait}
+                    </Badge>
+                  ))}
+                </div>
+                <p className="shenshi-personality-text">{shenShiAnalysis.personality}</p>
+              </Card>
+
+              <Card className="bazi-shenshi-career-card">
+                <h3 className="card-title">职业倾向</h3>
+                <p className="shenshi-career-text">{shenShiAnalysis.careerTendency}</p>
+                <div className="shenshi-career-suggestions">
+                  <p className="shenshi-career-label">推荐方向：</p>
+                  <div className="shenshi-career-tags">
+                    {shenShiAnalysis.careerSuggestions.map((item, idx) => (
+                      <Badge key={idx} variant="gold" size="sm">
+                        {item}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bazi-shenshi-relationship-card">
+                <h3 className="card-title">婚恋特点</h3>
+                <p className="shenshi-relationship-text">{shenShiAnalysis.relationshipTraits}</p>
+                <div className="shenshi-relationship-section">
+                  <p className="shenshi-relationship-label">优势：</p>
+                  <ul className="shenshi-relationship-list">
+                    {shenShiAnalysis.relationshipStrengths.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="shenshi-relationship-section">
+                  <p className="shenshi-relationship-label">注意：</p>
+                  <ul className="shenshi-relationship-list">
+                    {shenShiAnalysis.relationshipChallenges.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </Card>
+
+              {shenShiAnalysis.combinations.length > 0 && (
+                <Card className="bazi-shenshi-combinations-card">
+                  <h3 className="card-title">十神组合</h3>
+                  <div className="shenshi-combinations-list">
+                    {shenShiAnalysis.combinations.map((combo, idx) => (
+                      <div key={idx} className={`shenshi-combination-item ${combo.auspicious ? 'auspicious' : 'inauspicious'}`}>
+                        <div className="shenshi-combination-header">
+                          <span className="shenshi-combination-name">{combo.name}</span>
+                          <Badge variant={combo.auspicious ? 'success' : 'error'} size="sm">
+                            {combo.auspicious ? '吉' : '凶'}
+                          </Badge>
+                        </div>
+                        <p className="shenshi-combination-desc">{combo.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+            </div>
           )}
 
           {activeTab === 'wangshuai' && (
@@ -277,7 +396,7 @@ export default function BaziChart() {
               <h3 className="card-title">格局分析</h3>
               <div className="geju-main">
                 <div className="geju-name">{geJu.name}</div>
-                <Badge variant={geJu.isSpecial ? 'gold' : 'primary'} size="sm">
+                <Badge variant={geJu.isSpecial ? 'gold' : 'default'} size="sm">
                   {geJu.isSpecial ? '变格' : '正格'}
                 </Badge>
               </div>
