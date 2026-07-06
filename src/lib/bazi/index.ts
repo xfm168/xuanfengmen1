@@ -83,5 +83,9 @@ export type { ShenShiDetail, ShenShiAnalysisResult, ShenShiPower, ShenShiCombina
 export { calculateFiveElementPower } from './fiveElementPower'
 export type { ElementPowerDetail, FiveElementPowerResult } from './fiveElementPower'
 
+// DaYun Analysis (大运分析)
+export { analyzeDaYun } from './dayunAnalysis'
+export type { DaYunAnalysisStep, DaYunAnalysisResult } from './dayunAnalysis'
+
 // P0-② 子时换日模块
 export * from './zishi'

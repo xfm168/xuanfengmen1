@@ -4,12 +4,12 @@ import { PageTitle, Card, Badge, Button, Loading } from '../components/ui'
 import { ScoreRing, ScoreBar } from '../components/business'
 import { useBazi } from '../hooks/useBazi'
 import { useAIAnalysis } from '../hooks/useAIAnalysis'
-import { calculateBaZiFromBirthData, type FiveElement, type BaZiAnalysis, determineGeJu, type GeJuResult, calculateShenSha, type ShenShaCategory, analyzeShenShi, type ShenShiAnalysisResult, calculateFiveElementPower } from '../lib/bazi'
+import { calculateBaZiFromBirthData, type FiveElement, type BaZiAnalysis, determineGeJu, type GeJuResult, calculateShenSha, type ShenShaCategory, analyzeShenShi, type ShenShiAnalysisResult, calculateFiveElementPower, analyzeDaYun } from '../lib/bazi'
 import { DEFAULT_BAZI_ANALYSIS } from '../constants/defaultAnalysis'
 import type { BirthData } from '@/lib/core'
 import './BaziChart.css'
 
-type TabKey = 'overview' | 'wuxing' | 'shenshi' | 'wangshuai' | 'geju' | 'shensha' | 'xiyong' | 'analysis'
+type TabKey = 'overview' | 'wuxing' | 'shenshi' | 'wangshuai' | 'geju' | 'shensha' | 'xiyong' | 'dayun' | 'analysis'
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'overview', label: '命盘' },
@@ -19,6 +19,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'geju', label: '格局' },
   { key: 'shensha', label: '神煞' },
   { key: 'xiyong', label: '喜用神' },
+  { key: 'dayun', label: '大运' },
   { key: 'analysis', label: '解析' },
 ]
 
@@ -151,6 +152,16 @@ export default function BaziChart() {
   const fiveElementPower = calculateFiveElementPower(
     sixLines,
     dayMaster.dayGan,
+  )
+
+  const birthDate = new Date(`${chartBirth.birthDate}T${chartBirth.birthTime}`)
+  const daYun = analyzeDaYun(
+    sixLines,
+    birthDate,
+    dayMaster.dayGan,
+    chartBirth.gender,
+    [xiYongShen.bestElement],
+    xiYongShen.avoidedElements,
   )
 
   function handleSave() {
@@ -647,6 +658,94 @@ export default function BaziChart() {
                 )}
               </div>
             </Card>
+          )}
+
+          {activeTab === 'dayun' && (
+            <div className="bazi-dayun-analysis">
+              <Card className="bazi-dayun-overview-card">
+                <h3 className="card-title">起运信息</h3>
+                <div className="dayun-overview-grid">
+                  <div className="dayun-overview-item">
+                    <p className="dayun-overview-label">起运年龄</p>
+                    <p className="dayun-overview-value">{daYun.qiYun.qiYunAge}</p>
+                  </div>
+                  <div className="dayun-overview-item">
+                    <p className="dayun-overview-label">起运方向</p>
+                    <p className="dayun-overview-value">{daYun.qiYun.isShun ? '顺行' : '逆行'}</p>
+                  </div>
+                  <div className="dayun-overview-item">
+                    <p className="dayun-overview-label">起运时间</p>
+                    <p className="dayun-overview-value">
+                      {daYun.qiYun.qiYunDate.getFullYear()}年
+                      {daYun.qiYun.qiYunDate.getMonth() + 1}月
+                      {daYun.qiYun.qiYunDate.getDate()}日
+                    </p>
+                  </div>
+                  <div className="dayun-overview-item">
+                    <p className="dayun-overview-label">当前大运</p>
+                    <p className="dayun-overview-value">
+                      {daYun.currentStepIndex >= 0
+                        ? `第${daYun.currentStepIndex + 1}步`
+                        : '未起运'}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bazi-dayun-list-card">
+                <h3 className="card-title">大运走势</h3>
+                <div className="dayun-list">
+                  {daYun.steps.map((step, idx) => (
+                    <div
+                      key={step.index}
+                      className={`dayun-item ${idx === daYun.currentStepIndex ? 'dayun-item--current' : ''}`}
+                    >
+                      <div className="dayun-item-header">
+                        <div className="dayun-item-index">第{step.index}步</div>
+                        <div className="dayun-item-ganzhi">
+                          <span className="dayun-gan">{step.ganZhi.gan}</span>
+                          <span className="dayun-zhi">{step.ganZhi.zhi}</span>
+                        </div>
+                        <div className="dayun-item-shenshi">
+                          <Badge variant="default" size="sm">{step.shenShi.gan}</Badge>
+                        </div>
+                      </div>
+                      <div className="dayun-item-info">
+                        <div className="dayun-item-age">
+                          {step.startAge}-{step.endAge}岁
+                        </div>
+                        <div className="dayun-item-year">
+                          {step.startYear}-{step.endYear}年
+                        </div>
+                      </div>
+                      <div className="dayun-item-tags">
+                        {step.isXi && <Badge variant="success" size="sm">喜</Badge>}
+                        {step.isJi && <Badge variant="error" size="sm">忌</Badge>}
+                        <Badge variant="default" size="sm">{step.wangShuai}</Badge>
+                      </div>
+                      <div className="dayun-item-score">
+                        <div className="dayun-score-bar">
+                          <div
+                            className="dayun-score-fill"
+                            style={{
+                              width: `${step.score}%`,
+                              background: step.score >= 70 ? 'var(--success)' : step.score >= 50 ? 'var(--gold-500)' : 'var(--error)'
+                            }}
+                          />
+                        </div>
+                        <span className="dayun-score-value">{step.score}分</span>
+                      </div>
+                      <div className="dayun-item-summary">
+                        {step.summary}
+                      </div>
+                      <div className="dayun-item-detail">
+                        <p>{step.detail}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
           )}
 
           {activeTab === 'analysis' && (
