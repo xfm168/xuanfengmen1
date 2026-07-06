@@ -1265,6 +1265,170 @@
   font-weight: 600;
 }
 
+/* LiuYue (流月) styles */
+.bazi-liuyue-analysis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.liuyue-overview-info {
+  display: flex;
+  justify-content: center;
+}
+
+.liuyue-year-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.liuyue-year-display {
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: var(--font-serif);
+  color: var(--text-primary);
+  min-width: 160px;
+  text-align: center;
+}
+
+.liuyue-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+@media (max-width: 768px) {
+  .liuyue-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .liuyue-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.liuyue-item {
+  padding: var(--space-3);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.liuyue-item--expanded {
+  border-color: var(--gold-500);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.liuyue-item-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  cursor: pointer;
+  flex-wrap: wrap;
+}
+
+.liuyue-item-month {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+  min-width: 50px;
+}
+
+.liuyue-item-ganzhi {
+  display: flex;
+  gap: 2px;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.liuyue-gan {
+  color: var(--text-primary);
+}
+
+.liuyue-zhi {
+  color: var(--text-secondary);
+}
+
+.liuyue-item-jixiong {
+  margin-left: auto;
+}
+
+.liuyue-item-toggle {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+}
+
+.liuyue-item-score {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.liuyue-score-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-primary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.liuyue-score-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.liuyue-score-value {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 35px;
+  text-align: right;
+}
+
+.liuyue-item-summary {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.liuyue-item-detail {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.liuyue-item-detail p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-2);
+}
+
+.liuyue-item-detail p:last-child {
+  margin-bottom: 0;
+}
+
+.liuyue-item-detail strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.liuyue-item-relations {
+  margin-top: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
 @media (max-width: 480px) {
   .dayun-overview-grid {
     grid-template-columns: repeat(2, 1fr);

@@ -4,12 +4,12 @@ import { PageTitle, Card, Badge, Button, Loading } from '../components/ui'
 import { ScoreRing, ScoreBar } from '../components/business'
 import { useBazi } from '../hooks/useBazi'
 import { useAIAnalysis } from '../hooks/useAIAnalysis'
-import { calculateBaZiFromBirthData, type FiveElement, type BaZiAnalysis, determineGeJu, type GeJuResult, calculateShenSha, type ShenShaCategory, analyzeShenShi, type ShenShiAnalysisResult, calculateFiveElementPower, analyzeDaYun, analyzeLiuNian } from '../lib/bazi'
+import { calculateBaZiFromBirthData, type FiveElement, type BaZiAnalysis, determineGeJu, type GeJuResult, calculateShenSha, type ShenShaCategory, analyzeShenShi, type ShenShiAnalysisResult, calculateFiveElementPower, analyzeDaYun, analyzeLiuNian, analyzeLiuYue } from '../lib/bazi'
 import { DEFAULT_BAZI_ANALYSIS } from '../constants/defaultAnalysis'
 import type { BirthData } from '@/lib/core'
 import './BaziChart.css'
 
-type TabKey = 'overview' | 'wuxing' | 'shenshi' | 'wangshuai' | 'geju' | 'shensha' | 'xiyong' | 'dayun' | 'liunian' | 'analysis'
+type TabKey = 'overview' | 'wuxing' | 'shenshi' | 'wangshuai' | 'geju' | 'shensha' | 'xiyong' | 'dayun' | 'liunian' | 'liuyue' | 'analysis'
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'overview', label: '命盘' },
@@ -21,6 +21,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'xiyong', label: '喜用神' },
   { key: 'dayun', label: '大运' },
   { key: 'liunian', label: '流年' },
+  { key: 'liuyue', label: '流月' },
   { key: 'analysis', label: '解析' },
 ]
 
@@ -81,6 +82,7 @@ export default function BaziChart() {
   const [saved, setSaved] = useState(false)
   const [expandedDayun, setExpandedDayun] = useState<number | null>(null)
   const [expandedLiunian, setExpandedLiunian] = useState<number | null>(null)
+  const [expandedLiuyue, setExpandedLiuyue] = useState<number | null>(null)
 
   useEffect(() => {
     if (!chart && charts.length > 0) {
@@ -173,6 +175,13 @@ export default function BaziChart() {
     dayMaster.dayGan,
     currentYear,
     100,
+  )
+
+  const [liuYueYear, setLiuYueYear] = useState(currentYear)
+  const liuYue = analyzeLiuYue(
+    sixLines,
+    dayMaster.dayGan,
+    liuYueYear,
   )
 
   function handleSave() {
@@ -850,6 +859,107 @@ export default function BaziChart() {
                           {year.po.length > 0 && (
                             <p><strong>破：</strong>{year.po.join('、')}</p>
                           )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === 'liuyue' && (
+            <div className="bazi-liuyue-analysis">
+              <Card className="bazi-liuyue-overview-card">
+                <h3 className="card-title">流月概览</h3>
+                <div className="liuyue-overview-info">
+                  <div className="liuyue-year-selector">
+                    <Button variant="secondary" size="sm" onClick={() => setLiuYueYear(liuYueYear - 1)}>
+                      上一年
+                    </Button>
+                    <span className="liuyue-year-display">
+                      {liuYue.year}年 {liuYue.yearGanZhi.gan}{liuYue.yearGanZhi.zhi}
+                    </span>
+                    <Button variant="secondary" size="sm" onClick={() => setLiuYueYear(liuYueYear + 1)}>
+                      下一年
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bazi-liuyue-list-card">
+                <h3 className="card-title">流月走势</h3>
+                <div className="liuyue-grid">
+                  {liuYue.months.map((month) => (
+                    <div
+                      key={month.monthIndex}
+                      className={`liuyue-item ${expandedLiuyue === month.monthIndex ? 'liuyue-item--expanded' : ''}`}
+                    >
+                      <div
+                        className="liuyue-item-header"
+                        onClick={() => setExpandedLiuyue(expandedLiuyue === month.monthIndex ? null : month.monthIndex)}
+                      >
+                        <div className="liuyue-item-month">{month.monthName}</div>
+                        <div className="liuyue-item-ganzhi">
+                          <span className="liuyue-gan">{month.ganZhi.gan}</span>
+                          <span className="liuyue-zhi">{month.ganZhi.zhi}</span>
+                        </div>
+                        <div className="liuyue-item-shenshi">
+                          <Badge variant="default" size="sm">{month.shenShi.gan}</Badge>
+                        </div>
+                        <div className="liuyue-item-jixiong">
+                          <Badge
+                            variant={
+                              month.jiXiong === '大吉' ? 'success' :
+                              month.jiXiong === '吉' ? 'gold' :
+                              month.jiXiong === '平' ? 'default' :
+                              month.jiXiong === '凶' ? 'warning' : 'error'
+                            }
+                            size="sm"
+                          >
+                            {month.jiXiong}
+                          </Badge>
+                        </div>
+                        <div className="liuyue-item-toggle">
+                          {expandedLiuyue === month.monthIndex ? '▲' : '▼'}
+                        </div>
+                      </div>
+                      <div className="liuyue-item-score">
+                        <div className="liuyue-score-bar">
+                          <div
+                            className="liuyue-score-fill"
+                            style={{
+                              width: `${month.score}%`,
+                              background: month.score >= 70 ? 'var(--success)' : month.score >= 50 ? 'var(--gold-500)' : 'var(--error)'
+                            }}
+                          />
+                        </div>
+                        <span className="liuyue-score-value">{month.score}分</span>
+                      </div>
+                      <div className="liuyue-item-summary">
+                        {month.summary}
+                      </div>
+                      {expandedLiuyue === month.monthIndex && (
+                        <div className="liuyue-item-detail">
+                          <p><strong>注意事项：</strong></p>
+                          <p>{month.notice}</p>
+                          <div className="liuyue-item-relations">
+                            {month.chong.length > 0 && (
+                              <p><strong>冲：</strong>{month.chong.join('、')}</p>
+                            )}
+                            {month.he.length > 0 && (
+                              <p><strong>合：</strong>{month.he.join('、')}</p>
+                            )}
+                            {month.xing.length > 0 && (
+                              <p><strong>刑：</strong>{month.xing.join('、')}</p>
+                            )}
+                            {month.hai.length > 0 && (
+                              <p><strong>害：</strong>{month.hai.join('、')}</p>
+                            )}
+                            {month.po.length > 0 && (
+                              <p><strong>破：</strong>{month.po.join('、')}</p>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
