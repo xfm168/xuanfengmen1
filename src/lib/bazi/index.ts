@@ -115,5 +115,9 @@ export type { HealthAnalysisResult, BodyConstitution, DiseaseRisk, DietSuggestio
 export { analyzeFengShui } from './fengshuiAnalysis'
 export type { FengShuiAnalysisResult, ColorAdvice, LuckyNumber, DirectionAdvice, RoomAdvice, SpecialPosition } from './fengshuiAnalysis'
 
+// Full Report (P7 AI解读)
+export { generateFullReport } from './fullReport'
+export type { FullReportResult, ReportChapter, FullReportInput } from './fullReport'
+
 // P0-② 子时换日模块
 export * from './zishi'

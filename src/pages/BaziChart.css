@@ -2754,3 +2754,153 @@
   color: var(--text-primary);
   line-height: 1.8;
 }
+
+/* ========== 完整命书 (P7) ========== */
+.bazi-full-report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.bazi-report-header-card {
+  padding: var(--space-6);
+  text-align: center;
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(212, 175, 55, 0.05) 100%);
+}
+
+.report-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold-500);
+  margin-bottom: var(--space-2);
+  letter-spacing: 0.1em;
+}
+
+.report-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-1);
+}
+
+.report-wordcount {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.report-export-buttons {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.bazi-report-chapter-card {
+  padding: var(--space-5);
+  animation: fadeInUp 0.5s ease both;
+}
+
+.bazi-report-chapter-card:nth-child(2) { animation-delay: 0.05s; }
+.bazi-report-chapter-card:nth-child(3) { animation-delay: 0.1s; }
+.bazi-report-chapter-card:nth-child(4) { animation-delay: 0.15s; }
+.bazi-report-chapter-card:nth-child(5) { animation-delay: 0.2s; }
+.bazi-report-chapter-card:nth-child(6) { animation-delay: 0.25s; }
+.bazi-report-chapter-card:nth-child(7) { animation-delay: 0.3s; }
+.bazi-report-chapter-card:nth-child(8) { animation-delay: 0.35s; }
+.bazi-report-chapter-card:nth-child(9) { animation-delay: 0.4s; }
+.bazi-report-chapter-card:nth-child(10) { animation-delay: 0.45s; }
+.bazi-report-chapter-card:nth-child(11) { animation-delay: 0.5s; }
+.bazi-report-chapter-card:nth-child(12) { animation-delay: 0.55s; }
+.bazi-report-chapter-card:nth-child(13) { animation-delay: 0.6s; }
+.bazi-report-chapter-card:nth-child(14) { animation-delay: 0.65s; }
+
+.report-chapter-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold-500);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.report-chapter-content {
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+}
+
+.report-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.report-subsection-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: var(--space-2) 0 var(--space-1);
+}
+
+.report-paragraph {
+  margin-bottom: var(--space-2);
+  text-indent: 2em;
+}
+
+.report-list-item {
+  margin-bottom: var(--space-1);
+  margin-left: var(--space-4);
+  color: var(--text-secondary);
+}
+
+.report-bold {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Print styles for PDF export */
+@media print {
+  .bazi-chart-header,
+  .bazi-tab-bar,
+  .bazi-actions,
+  .report-export-buttons,
+  .score-ring,
+  .chart-table,
+  .bazi-section-title,
+  .page-title {
+    display: none !important;
+  }
+
+  .bazi-chart-content {
+    padding: 0 !important;
+  }
+
+  .bazi-full-report {
+    gap: 20px;
+  }
+
+  .bazi-report-chapter-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #ddd;
+    box-shadow: none;
+  }
+
+  .report-chapter-title {
+    color: #8B4513;
+    border-bottom: 2px solid #D4AF37;
+  }
+}

@@ -4,7 +4,18 @@ import { PageTitle, Card, Badge, Button, Loading } from '../components/ui'
 import { ScoreRing, ScoreBar } from '../components/business'
 import { useBazi } from '../hooks/useBazi'
 import { useAIAnalysis } from '../hooks/useAIAnalysis'
-import { calculateBaZiFromBirthData, type FiveElement, type BaZiAnalysis, determineGeJu, type GeJuResult, calculateShenSha, type ShenShaCategory, analyzeShenShi, type ShenShiAnalysisResult, calculateFiveElementPower, analyzeDaYun, analyzeLiuNian, analyzeLiuYue, analyzeMarriage, type MarriageAnalysisResult, analyzeCareer, type CareerAnalysisResult, analyzeWealth, type WealthAnalysisResult, analyzeHealth, type HealthAnalysisResult, analyzeFengShui, type FengShuiAnalysisResult } from '../lib/bazi'
+import {
+  calculateBaZiFromBirthData, type FiveElement, type BaZiAnalysis,
+  determineGeJu, type GeJuResult, calculateShenSha, type ShenShaCategory,
+  analyzeShenShi, type ShenShiAnalysisResult, calculateFiveElementPower,
+  analyzeDaYun, analyzeLiuNian, analyzeLiuYue,
+  analyzeMarriage, type MarriageAnalysisResult,
+  analyzeCareer, type CareerAnalysisResult,
+  analyzeWealth, type WealthAnalysisResult,
+  analyzeHealth, type HealthAnalysisResult,
+  analyzeFengShui, type FengShuiAnalysisResult,
+  generateFullReport, type FullReportResult,
+} from '../lib/bazi'
 import { DEFAULT_BAZI_ANALYSIS } from '../constants/defaultAnalysis'
 import type { BirthData } from '@/lib/core'
 import './BaziChart.css'
@@ -225,6 +236,23 @@ export default function BaziChart() {
     fiveElementPower,
     shenShiAnalysis.details[0]?.name || '',
   )
+
+  const fullReport = generateFullReport({
+    chart,
+    sixLines,
+    dayMaster,
+    geJu,
+    wangShuai,
+    shenShiAnalysis,
+    fiveElementPower,
+    shenSha,
+    xiYongShen: { bestElement: xiYongShen.bestElement, avoidedElements: xiYongShen.avoidedElements },
+    marriage,
+    career,
+    wealth,
+    health,
+    fengshui,
+  })
 
   function handleSave() {
     if (chart) {
@@ -1670,62 +1698,93 @@ export default function BaziChart() {
           )}
 
           {activeTab === 'analysis' && (
-            <div className="bazi-analysis-list">
-              {aiLoading && (
-                <Card className="analysis-card">
-                  <div className="ai-loading">
-                    <Loading size="md" />
-                    <p>命盘推演中，请稍候...</p>
+            <div className="bazi-full-report">
+              <Card className="bazi-report-header-card">
+                <h2 className="report-title">{fullReport.title}</h2>
+                <p className="report-subtitle">{fullReport.subtitle}</p>
+                <p className="report-wordcount">共 {fullReport.wordCount.toLocaleString()} 字</p>
+                <div className="report-export-buttons">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      const blob = new Blob([`# ${fullReport.title}\n\n${fullReport.subtitle}\n\n---\n\n` + fullReport.chapters.map(c => c.content).join('\n\n')], { type: 'text/markdown;charset=utf-8' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `${fullReport.title}.md`
+                      a.click()
+                      URL.revokeObjectURL(url)
+                    }}
+                  >
+                    导出 Markdown
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>${fullReport.title}</title>
+<style>
+body{font-family:"Noto Sans CJK SC",sans-serif;max-width:800px;margin:40px auto;padding:20px;line-height:1.8;color:#333}
+h1{text-align:center;color:#8B4513}h2{color:#8B4513;border-bottom:2px solid #D4AF37;padding-bottom:8px}
+.subtitle{text-align:center;color:#666;margin-bottom:30px}
+.wordcount{text-align:center;color:#999;font-size:0.9em;margin-bottom:40px}
+</style></head>
+<body>
+<h1>${fullReport.title}</h1>
+<p class="subtitle">${fullReport.subtitle}</p>
+<p class="wordcount">共 ${fullReport.wordCount.toLocaleString()} 字</p>
+${fullReport.chapters.map(c => `<h2>${c.title}</h2>\n${c.content.replace(/\n/g, '<br>')}`).join('<br><br>')}
+</body></html>`
+                      const blob = new Blob(['\ufeff' + html], { type: 'application/msword;charset=utf-8' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `${fullReport.title}.doc`
+                      a.click()
+                      URL.revokeObjectURL(url)
+                    }}
+                  >
+                    导出 Word
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => window.print()}
+                  >
+                    打印 / PDF
+                  </Button>
+                </div>
+              </Card>
+
+              {fullReport.chapters.map((chapter, idx) => (
+                <Card key={idx} className="bazi-report-chapter-card" id={`chapter-${chapter.id}`}>
+                  <h3 className="report-chapter-title">{chapter.title}</h3>
+                  <div className="report-chapter-content">
+                    {chapter.content.split('\n').map((line, lidx) => {
+                      if (line.startsWith('## ')) {
+                        return <h4 key={lidx} className="report-section-title">{line.replace('## ', '')}</h4>
+                      }
+                      if (line.startsWith('### ')) {
+                        return <h5 key={lidx} className="report-subsection-title">{line.replace('### ', '')}</h5>
+                      }
+                      if (line.startsWith('- ')) {
+                        return <li key={lidx} className="report-list-item">{line.replace('- ', '')}</li>
+                      }
+                      if (line.startsWith('**') && line.endsWith('**')) {
+                        return <p key={lidx} className="report-bold">{line.replace(/\*\*/g, '')}</p>
+                      }
+                      if (line.trim() === '') {
+                        return <br key={lidx} />
+                      }
+                      return <p key={lidx} className="report-paragraph">{line}</p>
+                    })}
                   </div>
                 </Card>
-              )}
-
-              {aiError && !aiLoading && (
-                <Card className="analysis-card">
-                  <h3 className="card-title">解析失败</h3>
-                  <p className="analysis-text error">{aiError}</p>
-                  <Button variant="secondary" onClick={retryAnalysis}>
-                    重新生成
-                  </Button>
-                </Card>
-              )}
-
-              {!aiLoading && (
-                <>
-                  <Card className="analysis-card">
-                    <h3 className="card-title">总体命格</h3>
-                    <p className="analysis-text">{analysis.overall}</p>
-                  </Card>
-                  <Card className="analysis-card">
-                    <h3 className="card-title">性格分析</h3>
-                    <p className="analysis-text">{analysis.personality}</p>
-                  </Card>
-                  <Card className="analysis-card">
-                    <h3 className="card-title">事业分析</h3>
-                    <p className="analysis-text">{analysis.career}</p>
-                  </Card>
-                  <Card className="analysis-card">
-                    <h3 className="card-title">财运分析</h3>
-                    <p className="analysis-text">{analysis.wealth}</p>
-                  </Card>
-                  <Card className="analysis-card">
-                    <h3 className="card-title">婚姻感情</h3>
-                    <p className="analysis-text">{analysis.relationship}</p>
-                  </Card>
-                  <Card className="analysis-card">
-                    <h3 className="card-title">健康建议</h3>
-                    <p className="analysis-text">{analysis.health}</p>
-                  </Card>
-                  <Card className="analysis-card">
-                    <h3 className="card-title">五行建议</h3>
-                    <p className="analysis-text">{analysis.wuxingAdvice}</p>
-                  </Card>
-                  <Card className="analysis-card">
-                    <h3 className="card-title">综合总结</h3>
-                    <p className="analysis-text">{analysis.summary}</p>
-                  </Card>
-                </>
-              )}
+              ))}
             </div>
           )}
         </div>
